@@ -1,15 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\CalculadoraHex.Core\CalculadoraHex.Core.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <AssemblyName>CalculadoraHex</AssemblyName>
+    <RootNamespace>CalculadoraHex.App</RootNamespace>
+    <ApplicationManifest Condition="Exists('app.manifest')">app.manifest</ApplicationManifest>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CalculadoraHex.Core\CalculadoraHex.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Fontes de display (DSEG). Se a pasta estiver vazia, o WPF usa a fonte de fallback definida no tema. -->
+    <Resource Include="Resources\Fonts\*.ttf" />
+  </ItemGroup>
 
 </Project>

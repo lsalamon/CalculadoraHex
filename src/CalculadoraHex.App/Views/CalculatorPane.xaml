@@ -1,0 +1,60 @@
+<UserControl x:Class="CalculadoraHex.App.Views.CalculatorPane"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:CalculadoraHex.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:PaneViewModel}"
+             MinWidth="260">
+
+    <Border Style="{StaticResource PaneBezelStyle}">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Title}" Style="{StaticResource PaneTitleStyle}" />
+
+            <!-- Linha de entrada -->
+            <Border DockPanel.Dock="Bottom" Style="{StaticResource DisplayBorderStyle}" Margin="0,8,0,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Left" Text="&gt;" Style="{StaticResource PromptStyle}" />
+                    <TextBox x:Name="InputBox"
+                             Style="{StaticResource DisplayInputStyle}"
+                             Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="{Binding Hint}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SubmitCommand}" />
+                            <KeyBinding Key="Escape" Command="{Binding ClearInputCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Display (histórico) -->
+            <Border Style="{StaticResource DisplayBorderStyle}">
+                <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                              Focusable="False" KeyboardNavigation.TabNavigation="None">
+                    <ItemsControl ItemsSource="{Binding Lines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:DisplayLine}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Expression}" Style="{StaticResource DisplayExpressionStyle}" />
+                                    <TextBlock Text="{Binding Result}" Style="{StaticResource DisplayResultStyle}">
+                                        <TextBlock.Resources>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayResultStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                        <Setter Property="Foreground" Value="{StaticResource DisplayErrorBrush}" />
+                                                        <Setter Property="FontSize" Value="16" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Resources>
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </DockPanel>
+    </Border>
+</UserControl>

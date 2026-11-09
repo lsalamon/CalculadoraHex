@@ -1,0 +1,52 @@
+using System.Collections.ObjectModel;
+using CalculadoraHex.Core;
+using CalculadoraHex.Core.Evaluation;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace CalculadoraHex.App.ViewModels;
+
+/// <summary>Um painel (hexa ou decimal): visão do histórico compartilhado na sua base, mais a linha de entrada.</summary>
+public sealed partial class PaneViewModel : ObservableObject
+{
+    private readonly CalculationSession _session;
+
+    public PaneViewModel(CalculationSession session, NumberBase numberBase)
+    {
+        _session = session;
+        Base = numberBase;
+    }
+
+    public NumberBase Base { get; }
+
+    public string Title => Base == NumberBase.Hexadecimal ? "HEXADECIMAL" : "DECIMAL";
+
+    public string Hint => Base == NumberBase.Hexadecimal
+        ? "Dígitos 0-9 A-F. Ex.: a=1234   a=a*4321   0xFF+1"
+        : "Dígitos 0-9. Ex.: a=4660   a=a*17185   (2+3)*4";
+
+    public ObservableCollection<DisplayLine> Lines { get; } = new();
+
+    [ObservableProperty]
+    private string _inputText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isVisible = true;
+
+    [RelayCommand]
+    private void Submit()
+    {
+        var text = InputText.Trim();
+        if (text.Length == 0) return;
+
+        _session.Evaluate(text, Base);
+        InputText = string.Empty;
+    }
+
+    [RelayCommand]
+    private void ClearInput() => InputText = string.Empty;
+
+    internal void Append(CalculationEntry entry) => Lines.Add(DisplayLine.From(entry, Base));
+
+    internal void ClearLines() => Lines.Clear();
+}
