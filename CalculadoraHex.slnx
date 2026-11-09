@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CalculadoraHex.App/CalculadoraHex.App.csproj" />
+    <Project Path="src/CalculadoraHex.Core/CalculadoraHex.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CalculadoraHex.Core.Tests/CalculadoraHex.Core.Tests.csproj" />
+  </Folder>
+</Solution>
