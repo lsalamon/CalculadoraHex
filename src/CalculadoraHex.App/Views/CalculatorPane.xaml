@@ -20,7 +20,8 @@
                     <TextBox x:Name="InputBox"
                              Style="{StaticResource DisplayInputStyle}"
                              Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTip="{Binding Hint}">
+                             ToolTip="{Binding Hint}"
+                             GotKeyboardFocus="OnInputGotFocus">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter" Command="{Binding SubmitCommand}" />
                             <KeyBinding Key="Escape" Command="{Binding ClearInputCommand}" />

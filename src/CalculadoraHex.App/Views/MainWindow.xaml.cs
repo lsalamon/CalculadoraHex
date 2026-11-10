@@ -10,6 +10,8 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel = new();
     private readonly UserPreferences _preferences = UserPreferences.Load();
+    private CalculatorPane _activePane;
+    private HelpWindow? _helpWindow;
 
     public MainWindow()
     {
@@ -17,6 +19,11 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
 
         _viewModel.ShowVariablesRequested += (_, _) => ShowVariablesWindow();
+        _viewModel.ShowHelpRequested += (_, _) => ShowHelpWindow();
+
+        _activePane = HexPaneView;
+        HexPaneView.InputFocused += (_, _) => _activePane = HexPaneView;
+        DecimalPaneView.InputFocused += (_, _) => _activePane = DecimalPaneView;
 
         if (_preferences.WindowWidth is > 300) Width = _preferences.WindowWidth.Value;
         if (_preferences.WindowHeight is > 200) Height = _preferences.WindowHeight.Value;
@@ -50,6 +57,31 @@ public partial class MainWindow : Window
             _preferences.WindowHeight = Height;
         }
         _preferences.Save();
+    }
+
+    private void OnInsertOperator(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.MenuItem { Tag: string text }) return;
+
+        var target = _activePane.Visibility == Visibility.Visible
+            ? _activePane
+            : (_viewModel.HexPane.IsVisible ? HexPaneView : DecimalPaneView);
+
+        target.InsertText(text);
+        if (text == "()") target.MoveCaret(-1);
+    }
+
+    private void ShowHelpWindow()
+    {
+        if (_helpWindow is { IsLoaded: true })
+        {
+            _helpWindow.Activate();
+            return;
+        }
+
+        _helpWindow = new HelpWindow { Owner = this };
+        _helpWindow.Closed += (_, _) => _helpWindow = null;
+        _helpWindow.Show();
     }
 
     private void ShowVariablesWindow()

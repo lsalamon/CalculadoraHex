@@ -182,7 +182,7 @@ Divisão é inteira (como em calculadoras de programador); divisão por zero ger
 - Re-execução das entradas ao carregar; testes de ida e volta (salvar → carregar → mesmo estado).
 - **Entrega:** fechar e reabrir a app mantém tudo.
 
-### Fase 6 — Polimento e empacotamento (≈ ½ dia)
+### Fase 6 — Polimento e empacotamento (≈ ½ dia) — ✅ concluída em 2026-11-09
 - Atalhos de teclado (Ctrl+N, Ctrl+O, Ctrl+1/Ctrl+2 alternam painéis, Esc limpa entrada).
 - Diálogo *Sobre*, ajuda de sintaxe, mensagens de erro no estilo do display.
 - `dotnet publish` single-file (win-x64), README com instruções.

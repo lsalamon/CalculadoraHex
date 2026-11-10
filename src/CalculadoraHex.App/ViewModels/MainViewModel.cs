@@ -172,6 +172,11 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ShowVariables() => ShowVariablesRequested?.Invoke(this, EventArgs.Empty);
 
+    public event EventHandler? ShowHelpRequested;
+
+    [RelayCommand]
+    private void ShowHelp() => ShowHelpRequested?.Invoke(this, EventArgs.Empty);
+
     [RelayCommand]
     private void ClearVariables()
     {

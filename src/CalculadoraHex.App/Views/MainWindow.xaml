@@ -17,6 +17,7 @@
         <KeyBinding Modifiers="Ctrl" Key="O" Command="{Binding OpenSessionCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="S" Command="{Binding SaveSessionAsCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="E" Command="{Binding ExportHistoryCommand}" />
+        <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{Binding ClearDisplayCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="V" Command="{Binding ShowVariablesCommand}" />
     </Window.InputBindings>
@@ -42,15 +43,22 @@
                 <MenuItem Header="_Listar / remover..." Command="{Binding ShowVariablesCommand}" InputGestureText="Ctrl+Shift+V" />
                 <MenuItem Header="Limpar _todas" Command="{Binding ClearVariablesCommand}" />
             </MenuItem>
+            <!-- Cada item insere o símbolo na linha de entrada que estava com o foco -->
             <MenuItem Header="_Operações">
-                <MenuItem Header="Soma" InputGestureText="+" IsEnabled="False" />
-                <MenuItem Header="Subtração" InputGestureText="-" IsEnabled="False" />
-                <MenuItem Header="Multiplicação" InputGestureText="*" IsEnabled="False" />
-                <MenuItem Header="Divisão inteira" InputGestureText="/" IsEnabled="False" />
-                <MenuItem Header="Agrupamento" InputGestureText="( )" IsEnabled="False" />
-                <MenuItem Header="Atribuição" InputGestureText="nome = expr" IsEnabled="False" />
+                <MenuItem Header="_Soma" InputGestureText="+" Tag=" + " Click="OnInsertOperator" />
+                <MenuItem Header="S_ubtração" InputGestureText="-" Tag=" - " Click="OnInsertOperator" />
+                <MenuItem Header="_Multiplicação" InputGestureText="*" Tag=" * " Click="OnInsertOperator" />
+                <MenuItem Header="_Divisão inteira" InputGestureText="/" Tag=" / " Click="OnInsertOperator" />
+                <Separator />
+                <MenuItem Header="_Parênteses" InputGestureText="( )" Tag="()" Click="OnInsertOperator" />
+                <MenuItem Header="_Atribuição" InputGestureText="nome = expr" Tag=" = " Click="OnInsertOperator" />
+                <Separator />
+                <MenuItem Header="Forçar _número hexa" InputGestureText="0x" Tag="0x" Click="OnInsertOperator" />
+                <MenuItem Header="Forçar _variável" InputGestureText="$" Tag="$" Click="OnInsertOperator" />
             </MenuItem>
             <MenuItem Header="A_juda">
+                <MenuItem Header="_Sintaxe..." Command="{Binding ShowHelpCommand}" InputGestureText="F1" />
+                <Separator />
                 <MenuItem Header="_Sobre..." Command="{Binding ShowAboutCommand}" />
             </MenuItem>
         </Menu>
