@@ -188,6 +188,11 @@ Divisão é inteira (como em calculadoras de programador); divisão por zero ger
 - `dotnet publish` single-file (win-x64), README com instruções.
 - **Entrega:** executável distribuível.
 
+### Fase 7 — Importar histórico — ✅ concluída em 2026-11-09
+- `Arquivo > Importar histórico` (Ctrl+I) acrescenta à sessão atual as operações de uma sessão `.json` ou de um script `.txt` (uma expressão por linha; prefixos `[hex]`/`[dec]`/`hex:`/`dec:`; comentários `#`, `;`, `//`).
+- Diálogo pergunta a base das linhas sem prefixo, sugerindo a do painel ativo.
+- **Entrega:** `HistoryImporter` no Core com testes; documentado na ajuda (F1) e no README.
+
 ### Fases futuras (fora do escopo inicial, já previstas na arquitetura)
 - Operações bitwise, shifts, módulo, potência (menu *Operações*).
 - Largura de palavra configurável (8/16/32/64 bits) com complemento de dois.

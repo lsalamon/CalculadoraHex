@@ -17,6 +17,7 @@
         <KeyBinding Modifiers="Ctrl" Key="O" Command="{Binding OpenSessionCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="S" Command="{Binding SaveSessionAsCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="E" Command="{Binding ExportHistoryCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="I" Command="{Binding ImportHistoryCommand}" />
         <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{Binding ClearDisplayCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="V" Command="{Binding ShowVariablesCommand}" />
@@ -29,6 +30,9 @@
                 <MenuItem Header="_Nova sessão" Command="{Binding NewSessionCommand}" InputGestureText="Ctrl+N" />
                 <MenuItem Header="_Abrir sessão..." Command="{Binding OpenSessionCommand}" InputGestureText="Ctrl+O" />
                 <MenuItem Header="Salvar _como..." Command="{Binding SaveSessionAsCommand}" InputGestureText="Ctrl+Shift+S" />
+                <Separator />
+                <MenuItem Header="_Importar histórico..." Command="{Binding ImportHistoryCommand}" InputGestureText="Ctrl+I"
+                          ToolTip="Acrescenta à sessão atual as operações de outra sessão (.json) ou de um script de texto (uma expressão por linha)" />
                 <MenuItem Header="_Exportar histórico..." Command="{Binding ExportHistoryCommand}" InputGestureText="Ctrl+E" />
                 <Separator />
                 <MenuItem Header="Sai_r" Command="{Binding ExitCommand}" InputGestureText="Alt+F4" />

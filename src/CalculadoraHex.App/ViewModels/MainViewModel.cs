@@ -131,6 +131,55 @@ public sealed partial class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>A janela decide a base das linhas sem prefixo (abre o diálogo); retorna nulo se cancelado.</summary>
+    public Func<NumberBase, NumberBase?>? AskImportBase { get; set; }
+
+    /// <summary>Base sugerida para o diálogo de importação: a do painel que está com o foco.</summary>
+    public NumberBase ActiveBase { get; set; } = NumberBase.Hexadecimal;
+
+    [RelayCommand]
+    private void ImportHistory()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Importar histórico",
+            Filter = "Sessão ou script (*.json;*.txt)|*.json;*.txt|Sessão CalculadoraHex (*.json)|*.json|Script de texto (*.txt)|*.txt|Todos os arquivos (*.*)|*.*",
+            InitialDirectory = EnsureDirectory(Sessions.SessionsDirectory),
+            CheckFileExists = true,
+        };
+        if (dialog.ShowDialog() != true) return;
+
+        try
+        {
+            IReadOnlyList<ImportItem> items;
+            if (string.Equals(Path.GetExtension(dialog.FileName), SessionStore.FileExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                items = HistoryImporter.FromDocument(new SessionStore(SessionStore.DefaultDirectory).Read(dialog.FileName));
+            }
+            else
+            {
+                var chosen = AskImportBase?.Invoke(ActiveBase);
+                if (chosen is null) return;
+                items = HistoryImporter.ParseScript(File.ReadAllText(dialog.FileName), chosen.Value);
+            }
+
+            if (items.Count == 0)
+            {
+                StatusMessage = "Nada para importar: o arquivo não tem operações.";
+                return;
+            }
+
+            var result = HistoryImporter.ImportInto(Session, items);
+            StatusMessage = result.Failed == 0
+                ? $"Importadas {result.Imported} operações."
+                : $"Importadas {result.Imported} operações, {result.Failed} com erro.";
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException)
+        {
+            MessageBox.Show("Não foi possível importar.\n\n" + ex.Message, "Importar histórico", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
     [RelayCommand]
     private void ExportHistory()
     {

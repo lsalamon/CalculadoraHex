@@ -24,6 +24,20 @@ Digite uma expressão na linha `>` de qualquer painel e pressione Enter. Os díg
 
 Cada operação é gravada em `%LOCALAPPDATA%\CalculadoraHex\sessoes\<data_hora>.json`. Ao abrir a app, a última sessão volta com histórico e variáveis. O menu **Arquivo** permite iniciar outra sessão, abrir uma antiga, salvar com outro nome e exportar o histórico em texto com as duas bases lado a lado.
 
+### Importar histórico
+
+**Arquivo > Importar histórico** (Ctrl+I) acrescenta operações à sessão atual, sem apagar nada. Aceita:
+
+- uma sessão gravada (`.json`), cujas linhas são reavaliadas na ordem e na base originais;
+- um script de texto (`.txt`) com uma expressão por linha. Prefixos `[hex]`, `[dec]`, `hex:` ou `dec:` fixam a base da linha; sem prefixo vale a base escolhida no diálogo. Linhas iniciadas por `#`, `;` ou `//` são comentários.
+
+```text
+# script.txt
+a = 1234
+[dec] b = a * 2
+hex: c = b + FF
+```
+
 ## Compilar e executar
 
 Requer o [.NET 10 SDK](https://dotnet.microsoft.com/download).

@@ -22,8 +22,14 @@ public partial class MainWindow : Window
         _viewModel.ShowHelpRequested += (_, _) => ShowHelpWindow();
 
         _activePane = HexPaneView;
-        HexPaneView.InputFocused += (_, _) => _activePane = HexPaneView;
-        DecimalPaneView.InputFocused += (_, _) => _activePane = DecimalPaneView;
+        HexPaneView.InputFocused += (_, _) => { _activePane = HexPaneView; _viewModel.ActiveBase = Core.NumberBase.Hexadecimal; };
+        DecimalPaneView.InputFocused += (_, _) => { _activePane = DecimalPaneView; _viewModel.ActiveBase = Core.NumberBase.Decimal; };
+
+        _viewModel.AskImportBase = suggested =>
+        {
+            var dialog = new ImportBaseWindow(suggested) { Owner = this };
+            return dialog.ShowDialog() == true ? dialog.SelectedBase : null;
+        };
 
         if (_preferences.WindowWidth is > 300) Width = _preferences.WindowWidth.Value;
         if (_preferences.WindowHeight is > 200) Height = _preferences.WindowHeight.Value;
