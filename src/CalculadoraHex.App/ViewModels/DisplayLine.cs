@@ -14,6 +14,9 @@ public sealed record DisplayLine(Guid EntryId, IReadOnlyList<TextSegment> Segmen
         if (entry.Succeeded && entry.Statement is not null)
         {
             var segments = ExpressionPrinter.PrintSegments(entry.Statement, paneBase);
+            // A ambiguidade número × variável só existe no painel hexa; no decimal não há o que realçar.
+            if (paneBase != NumberBase.Hexadecimal)
+                segments = segments.Select(s => s with { Ambiguous = false }).ToList();
             var value = NumberFormatter.Format(entry.Value!.Value, paneBase);
             var result = entry.AssignedVariable is null ? value : $"{entry.AssignedVariable} = {value}";
             return new DisplayLine(entry.Id, segments, result, IsError: false);
