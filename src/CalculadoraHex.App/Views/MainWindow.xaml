@@ -15,6 +15,7 @@
     <Window.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="N" Command="{Binding NewSessionCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{Binding ClearDisplayCommand}" />
+        <KeyBinding Modifiers="Ctrl+Shift" Key="V" Command="{Binding ShowVariablesCommand}" />
     </Window.InputBindings>
 
     <DockPanel>
@@ -29,15 +30,14 @@
                 <MenuItem Header="Sai_r" Command="{Binding ExitCommand}" InputGestureText="Alt+F4" />
             </MenuItem>
             <MenuItem Header="_Exibir">
-                <MenuItem Header="Painel _Hexadecimal" IsCheckable="True" IsChecked="{Binding HexPane.IsVisible}" InputGestureText="Ctrl+1" />
-                <MenuItem Header="Painel _Decimal" IsCheckable="True" IsChecked="{Binding DecimalPane.IsVisible}" InputGestureText="Ctrl+2" />
+                <MenuItem Header="Painel _Hexadecimal" IsCheckable="True" IsChecked="{Binding HexPane.IsVisible, Mode=TwoWay}" InputGestureText="Ctrl+1" />
+                <MenuItem Header="Painel _Decimal" IsCheckable="True" IsChecked="{Binding DecimalPane.IsVisible, Mode=TwoWay}" InputGestureText="Ctrl+2" />
                 <Separator />
                 <MenuItem Header="_Limpar display" Command="{Binding ClearDisplayCommand}" InputGestureText="Ctrl+L" />
             </MenuItem>
             <MenuItem Header="_Variáveis">
-                <MenuItem Header="_Listar..." IsEnabled="False" ToolTip="Disponível na fase de variáveis" />
-                <MenuItem Header="_Remover..." IsEnabled="False" ToolTip="Disponível na fase de variáveis" />
-                <MenuItem Header="Limpar _todas" IsEnabled="False" ToolTip="Disponível na fase de variáveis" />
+                <MenuItem Header="_Listar / remover..." Command="{Binding ShowVariablesCommand}" InputGestureText="Ctrl+Shift+V" />
+                <MenuItem Header="Limpar _todas" Command="{Binding ClearVariablesCommand}" />
             </MenuItem>
             <MenuItem Header="_Operações">
                 <MenuItem Header="Soma" InputGestureText="+" IsEnabled="False" />

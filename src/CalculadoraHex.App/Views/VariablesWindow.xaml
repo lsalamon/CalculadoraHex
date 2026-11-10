@@ -1,0 +1,77 @@
+<Window x:Class="CalculadoraHex.App.Views.VariablesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:CalculadoraHex.App.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:VariablesViewModel}"
+        Title="Variáveis"
+        Width="520" Height="380" MinWidth="400" MinHeight="260"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource BezelBrush}">
+
+    <DockPanel Margin="12">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button Content="_Remover selecionada" Command="{Binding RemoveSelectedCommand}" MinWidth="140" Margin="0,0,8,0" Padding="8,4" />
+            <Button Content="Limpar _todas" Click="OnRemoveAllClick" IsEnabled="{Binding HasRows}" MinWidth="100" Margin="0,0,8,0" Padding="8,4" />
+            <Button Content="_Fechar" IsCancel="True" MinWidth="80" Padding="8,4" />
+        </StackPanel>
+
+        <Border Style="{StaticResource DisplayBorderStyle}">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Rows}" SelectedItem="{Binding Selected}"
+                          AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                          HeadersVisibility="Column" GridLinesVisibility="None"
+                          Background="Transparent" RowBackground="Transparent" AlternatingRowBackground="#1A331A"
+                          BorderThickness="0" FontFamily="{StaticResource DisplayFont}" FontSize="16"
+                          Foreground="{StaticResource DisplayForegroundBrush}"
+                          SelectionMode="Single" SelectionUnit="FullRow">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{StaticResource DisplayBackgroundBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource DisplayDimBrush}" />
+                            <Setter Property="FontFamily" Value="{StaticResource LabelFont}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                            <Setter Property="Padding" Value="6,4" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Setter Property="BorderBrush" Value="{StaticResource DisplayDimBrush}" />
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="6,3" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Foreground" Value="{StaticResource DisplayForegroundBrush}" />
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource DisplayDimBrush}" />
+                                    <Setter Property="Foreground" Value="{StaticResource DisplayBackgroundBrush}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nome" Binding="{Binding Name}" Width="*" />
+                        <DataGridTextColumn Header="Hexadecimal" Binding="{Binding Hex}" Width="1.5*" />
+                        <DataGridTextColumn Header="Decimal" Binding="{Binding Decimal}" Width="1.5*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+                <TextBlock Text="Nenhuma variável definida."
+                           HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayExpressionStyle}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasRows}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </Border>
+    </DockPanel>
+</Window>

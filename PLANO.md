@@ -12,7 +12,7 @@ Calculadora desktop em .NET com dois painéis sincronizados (Hexadecimal e Decim
 | Framework GUI | **WPF** | Estilização livre (fonte 7 segmentos, cores, layout em colunas), DataBinding/MVVM, menus nativos |
 | Padrão | MVVM (CommunityToolkit.Mvvm) | Mantém a lógica testável fora da tela |
 | Tipo numérico | `System.Numerics.BigInteger` | Sem overflow; produtos hex grandes (ex.: `a*4321`) funcionam sem limite de 64 bits |
-| Fonte do display | **DSEG7 Classic** (licença SIL OFL) embarcada como recurso; fallback para `Consolas` | Reproduz o visual de dígitos de calculadora |
+| Fonte do display | **Consolas** (decisão de 2026-11-09). O tema já aponta para DSEG14 com fallback; basta colocar os `.ttf` em `Resources/Fonts/` para ativar | Sem download externo; visual retrô vem das cores e do layout |
 | Persistência | JSON (`System.Text.Json`) em `%LOCALAPPDATA%\CalculadoraHex\sessoes\` | Simples, legível, fácil de carregar e versionar |
 | Testes | xUnit | Parser/avaliador e persistência com cobertura automatizada |
 
@@ -158,19 +158,19 @@ Divisão é inteira (como em calculadoras de programador); divisão por zero ger
 - Testes xUnit cobrindo o exemplo do enunciado, erros de sintaxe e divisão por zero.
 - **Entrega:** biblioteca Core testada, sem UI.
 
-### Fase 2 — Interface básica (≈ 1 dia) — ✅ concluída em 2026-11-09 (fonte DSEG ainda pendente de download)
+### Fase 2 — Interface básica (≈ 1 dia) — ✅ concluída em 2026-11-09 (fonte: Consolas, por decisão do usuário)
 - `MainWindow` com menu superior e dois `CalculatorPane`.
 - Tema verde, fonte DSEG embarcada, display rolável + linha de entrada.
 - Digitar em qualquer painel avalia na base do painel e atualiza **ambos**.
 - **Entrega:** calculadora usável com as 4 operações nos dois lados.
 
-### Fase 3 — Variáveis e sincronismo (≈ ½ dia)
+### Fase 3 — Variáveis e sincronismo (≈ ½ dia) — ✅ concluída em 2026-11-09
 - Barra de status com variáveis nas duas bases.
 - Menu *Variáveis* (listar, limpar, remover).
 - Realce visual do token ambíguo (número vs variável) no painel hexa.
 - **Entrega:** cenário `a=1234` / `a=a*4321` funciona exatamente como especificado.
 
-### Fase 4 — Ocultar/exibir painéis (≈ ¼ dia) — ✅ alternância concluída em 2026-11-09; falta salvar preferência
+### Fase 4 — Ocultar/exibir painéis (≈ ¼ dia) — ✅ concluída em 2026-11-09
 - Itens checáveis em *Exibir*; colapso de coluna com `GridSplitter`.
 - Painel reexibido mostra histórico completo e rola para o fim.
 - Estado de visibilidade salvo nas preferências do usuário.

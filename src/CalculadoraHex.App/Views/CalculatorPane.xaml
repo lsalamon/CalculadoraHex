@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:CalculadoraHex.App.ViewModels"
+             xmlns:views="clr-namespace:CalculadoraHex.App.Views"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:PaneViewModel}"
              MinWidth="260">
@@ -36,7 +37,8 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:DisplayLine}">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Expression}" Style="{StaticResource DisplayExpressionStyle}" />
+                                    <TextBlock Style="{StaticResource DisplayExpressionStyle}"
+                                               views:SegmentedText.Segments="{Binding Segments}" />
                                     <TextBlock Text="{Binding Result}" Style="{StaticResource DisplayResultStyle}">
                                         <TextBlock.Resources>
                                             <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayResultStyle}">

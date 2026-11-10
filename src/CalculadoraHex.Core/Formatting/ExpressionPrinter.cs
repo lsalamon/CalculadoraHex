@@ -9,50 +9,68 @@ namespace CalculadoraHex.Core.Formatting;
 /// </summary>
 public static class ExpressionPrinter
 {
-    public static string Print(Statement statement, NumberBase numberBase)
+    public static string Print(Statement statement, NumberBase numberBase) =>
+        Join(PrintSegments(statement, numberBase));
+
+    public static string Print(Expression expression, NumberBase numberBase) =>
+        Join(PrintSegments(expression, numberBase));
+
+    /// <summary>Versão segmentada, para a UI colorir números, variáveis e tokens ambíguos.</summary>
+    public static IReadOnlyList<TextSegment> PrintSegments(Statement statement, NumberBase numberBase)
     {
         ArgumentNullException.ThrowIfNull(statement);
-        var sb = new StringBuilder();
+        var segments = new List<TextSegment>();
         if (statement.AssignedVariable is not null)
-            sb.Append(statement.AssignedVariable).Append(" = ");
-        Print(statement.Expression, numberBase, sb, parentPrecedence: 0);
-        return sb.ToString();
+        {
+            segments.Add(new TextSegment(statement.AssignedVariable, SegmentKind.Variable));
+            segments.Add(new TextSegment(" = ", SegmentKind.Punctuation));
+        }
+        Print(statement.Expression, numberBase, segments, parentPrecedence: 0);
+        return segments;
     }
 
-    public static string Print(Expression expression, NumberBase numberBase)
+    public static IReadOnlyList<TextSegment> PrintSegments(Expression expression, NumberBase numberBase)
+    {
+        ArgumentNullException.ThrowIfNull(expression);
+        var segments = new List<TextSegment>();
+        Print(expression, numberBase, segments, parentPrecedence: 0);
+        return segments;
+    }
+
+    private static string Join(IReadOnlyList<TextSegment> segments)
     {
         var sb = new StringBuilder();
-        Print(expression, numberBase, sb, parentPrecedence: 0);
+        foreach (var s in segments) sb.Append(s.Text);
         return sb.ToString();
     }
 
-    private static void Print(Expression expression, NumberBase numberBase, StringBuilder sb, int parentPrecedence)
+    private static void Print(Expression expression, NumberBase numberBase, List<TextSegment> segments, int parentPrecedence)
     {
         switch (expression)
         {
             case NumberLiteral n:
-                sb.Append(FormatLiteral(n, numberBase));
+                segments.Add(new TextSegment(FormatLiteral(n, numberBase), SegmentKind.Number, n.Ambiguous));
                 break;
 
             case VariableReference v:
-                sb.Append(v.Name);
+                segments.Add(new TextSegment(v.Name, SegmentKind.Variable, v.Ambiguous));
                 break;
 
             case NegateExpression neg:
-                sb.Append('-');
-                Print(neg.Operand, numberBase, sb, parentPrecedence: 3);
+                segments.Add(new TextSegment("-", SegmentKind.Operator));
+                Print(neg.Operand, numberBase, segments, parentPrecedence: 3);
                 break;
 
             case BinaryExpression b:
             {
                 var precedence = Precedence(b.Operator);
                 var needsParens = precedence < parentPrecedence;
-                if (needsParens) sb.Append('(');
-                Print(b.Left, numberBase, sb, precedence);
-                sb.Append(' ').Append(Symbol(b.Operator)).Append(' ');
+                if (needsParens) segments.Add(new TextSegment("(", SegmentKind.Punctuation));
+                Print(b.Left, numberBase, segments, precedence);
+                segments.Add(new TextSegment($" {Symbol(b.Operator)} ", SegmentKind.Operator));
                 // Lado direito com precedência +1 para preservar associatividade à esquerda (a - (b - c)).
-                Print(b.Right, numberBase, sb, precedence + 1);
-                if (needsParens) sb.Append(')');
+                Print(b.Right, numberBase, segments, precedence + 1);
+                if (needsParens) segments.Add(new TextSegment(")", SegmentKind.Punctuation));
                 break;
             }
 
@@ -70,9 +88,10 @@ public static class ExpressionPrinter
         var text = NumberFormatter.Format(literal.Value, numberBase);
         if (numberBase == NumberBase.Hexadecimal)
         {
-            var firstDigit = text.StartsWith('-') ? text[1..] : text;
-            if (firstDigit.Length > 0 && char.IsLetter(firstDigit[0]))
-                return text.StartsWith('-') ? "-0x" + firstDigit : "0x" + firstDigit;
+            var negative = text.StartsWith('-');
+            var digits = negative ? text[1..] : text;
+            if (digits.Length > 0 && char.IsLetter(digits[0]))
+                return (negative ? "-0x" : "0x") + digits;
         }
         return text;
     }

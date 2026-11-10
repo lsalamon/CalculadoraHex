@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using CalculadoraHex.App.Services;
 using CalculadoraHex.App.ViewModels;
 
 namespace CalculadoraHex.App.Views;
@@ -8,17 +9,48 @@ namespace CalculadoraHex.App.Views;
 public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel = new();
+    private readonly UserPreferences _preferences = UserPreferences.Load();
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = _viewModel;
 
+        _viewModel.ShowVariablesRequested += (_, _) => ShowVariablesWindow();
+
+        if (_preferences.WindowWidth is > 300) Width = _preferences.WindowWidth.Value;
+        if (_preferences.WindowHeight is > 200) Height = _preferences.WindowHeight.Value;
+
+        // Restaura a visibilidade dos painéis antes de assinar o evento, para não regravar durante o load.
+        _viewModel.HexPane.IsVisible = _preferences.HexPaneVisible || !_preferences.DecimalPaneVisible;
+        _viewModel.DecimalPane.IsVisible = _preferences.DecimalPaneVisible;
+        ApplyPaneVisibility();
+
         _viewModel.HexPane.PropertyChanged += OnPanePropertyChanged;
         _viewModel.DecimalPane.PropertyChanged += OnPanePropertyChanged;
 
-        Loaded += (_, _) => HexPaneView.FocusInput();
+        Loaded += (_, _) => FocusFirstVisiblePane();
+        Closing += OnClosing;
         PreviewKeyDown += OnPreviewKeyDown;
+    }
+
+    private void OnClosing(object? sender, CancelEventArgs e)
+    {
+        _preferences.HexPaneVisible = _viewModel.HexPane.IsVisible;
+        _preferences.DecimalPaneVisible = _viewModel.DecimalPane.IsVisible;
+        if (WindowState == WindowState.Normal)
+        {
+            _preferences.WindowWidth = Width;
+            _preferences.WindowHeight = Height;
+        }
+        _preferences.Save();
+    }
+
+    private void ShowVariablesWindow()
+    {
+        var window = new VariablesWindow(new VariablesViewModel(_viewModel.Session.Variables)) { Owner = this };
+        window.ShowDialog();
+        FocusFirstVisiblePane();
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -50,6 +82,9 @@ public partial class MainWindow : Window
         }
 
         ApplyPaneVisibility();
+        _preferences.HexPaneVisible = _viewModel.HexPane.IsVisible;
+        _preferences.DecimalPaneVisible = _viewModel.DecimalPane.IsVisible;
+        _preferences.Save();
     }
 
     /// <summary>
@@ -67,7 +102,12 @@ public partial class MainWindow : Window
         HexColumn.Width = hex ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         DecimalColumn.Width = dec ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
 
-        if (hex && !dec) HexPaneView.FocusInput();
-        else if (dec && !hex) DecimalPaneView.FocusInput();
+        if (IsLoaded) FocusFirstVisiblePane();
+    }
+
+    private void FocusFirstVisiblePane()
+    {
+        if (_viewModel.HexPane.IsVisible) HexPaneView.FocusInput();
+        else DecimalPaneView.FocusInput();
     }
 }

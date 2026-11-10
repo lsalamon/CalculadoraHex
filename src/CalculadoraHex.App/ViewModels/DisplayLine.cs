@@ -5,21 +5,24 @@ using CalculadoraHex.Core.Formatting;
 namespace CalculadoraHex.App.ViewModels;
 
 /// <summary>Uma linha do display, já renderizada na base do painel.</summary>
-public sealed record DisplayLine(Guid EntryId, string Expression, string Result, bool IsError)
+public sealed record DisplayLine(Guid EntryId, IReadOnlyList<TextSegment> Segments, string Result, bool IsError)
 {
+    public string Expression => string.Concat(Segments.Select(s => s.Text));
+
     public static DisplayLine From(CalculationEntry entry, NumberBase paneBase)
     {
         if (entry.Succeeded && entry.Statement is not null)
         {
-            var expression = ExpressionPrinter.Print(entry.Statement, paneBase);
+            var segments = ExpressionPrinter.PrintSegments(entry.Statement, paneBase);
             var value = NumberFormatter.Format(entry.Value!.Value, paneBase);
             var result = entry.AssignedVariable is null ? value : $"{entry.AssignedVariable} = {value}";
-            return new DisplayLine(entry.Id, expression, result, IsError: false);
+            return new DisplayLine(entry.Id, segments, result, IsError: false);
         }
 
         // Linha com erro: não há árvore para reescrever; mostramos o texto original e a base em que foi digitado.
         var origin = entry.InputBase == paneBase ? string.Empty : $"[{BaseTag(entry.InputBase)}] ";
-        return new DisplayLine(entry.Id, origin + entry.RawText, "ERRO: " + (entry.Error ?? "desconhecido"), IsError: true);
+        var raw = new[] { new TextSegment(origin + entry.RawText, SegmentKind.Punctuation) };
+        return new DisplayLine(entry.Id, raw, "ERRO: " + (entry.Error ?? "desconhecido"), IsError: true);
     }
 
     private static string BaseTag(NumberBase numberBase) => numberBase == NumberBase.Hexadecimal ? "hex" : "dec";

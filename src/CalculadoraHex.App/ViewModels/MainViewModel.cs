@@ -67,6 +67,24 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void Exit() => Application.Current.Shutdown();
 
+    /// <summary>A janela principal assina este evento e abre o diálogo de variáveis (a VM não conhece janelas).</summary>
+    public event EventHandler? ShowVariablesRequested;
+
+    [RelayCommand]
+    private void ShowVariables() => ShowVariablesRequested?.Invoke(this, EventArgs.Empty);
+
+    [RelayCommand]
+    private void ClearVariables()
+    {
+        if (Session.Variables.Count == 0) return;
+
+        var answer = MessageBox.Show(
+            "Remover todas as variáveis? O histórico do display é mantido.",
+            "Limpar variáveis", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (answer == MessageBoxResult.Yes)
+            Session.Variables.Clear();
+    }
+
     [RelayCommand]
     private void ShowAbout() => MessageBox.Show(
         "CalculadoraHex\n\nCalculadora hexadecimal/decimal com painéis sincronizados, variáveis e histórico automático.\n\n" +
