@@ -29,13 +29,19 @@ public partial class MainWindow : Window
         _viewModel.HexPane.PropertyChanged += OnPanePropertyChanged;
         _viewModel.DecimalPane.PropertyChanged += OnPanePropertyChanged;
 
-        Loaded += (_, _) => FocusFirstVisiblePane();
+        Loaded += (_, _) =>
+        {
+            _viewModel.RestoreLastSession();
+            FocusFirstVisiblePane();
+        };
         Closing += OnClosing;
         PreviewKeyDown += OnPreviewKeyDown;
     }
 
     private void OnClosing(object? sender, CancelEventArgs e)
     {
+        _viewModel.Shutdown();
+
         _preferences.HexPaneVisible = _viewModel.HexPane.IsVisible;
         _preferences.DecimalPaneVisible = _viewModel.DecimalPane.IsVisible;
         if (WindowState == WindowState.Normal)

@@ -13,11 +13,14 @@ public sealed class CalculationSession
     {
         Variables = new VariableStore();
         _evaluator = new Evaluator(Variables);
+        CreatedAt = DateTimeOffset.Now;
     }
 
     public VariableStore Variables { get; }
 
     public IReadOnlyList<CalculationEntry> Entries => _entries;
+
+    public DateTimeOffset CreatedAt { get; private set; }
 
     /// <summary>Disparado após cada linha avaliada, com sucesso ou erro.</summary>
     public event EventHandler<CalculationEntry>? EntryAdded;
@@ -25,18 +28,24 @@ public sealed class CalculationSession
     /// <summary>Disparado quando a sessão é reiniciada (histórico e variáveis zerados).</summary>
     public event EventHandler? Reset;
 
-    public CalculationEntry Evaluate(string text, NumberBase inputBase)
+    public CalculationEntry Evaluate(string text, NumberBase inputBase) =>
+        Evaluate(text, inputBase, DateTimeOffset.Now);
+
+    public CalculationEntry Evaluate(string text, NumberBase inputBase, DateTimeOffset timestamp)
     {
-        var entry = _evaluator.Evaluate(text, inputBase);
+        var entry = _evaluator.Evaluate(text, inputBase, timestamp);
         _entries.Add(entry);
         EntryAdded?.Invoke(this, entry);
         return entry;
     }
 
-    public void Clear()
+    public void Clear() => Clear(DateTimeOffset.Now);
+
+    public void Clear(DateTimeOffset createdAt)
     {
         _entries.Clear();
         Variables.Clear();
+        CreatedAt = createdAt;
         Reset?.Invoke(this, EventArgs.Empty);
     }
 }

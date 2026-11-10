@@ -37,4 +37,12 @@ public sealed class VariableStore
         _values.Clear();
         Changed?.Invoke(this, EventArgs.Empty);
     }
+
+    /// <summary>Substitui todo o conjunto de variáveis (usado ao carregar uma sessão gravada).</summary>
+    public void ReplaceAll(IReadOnlyDictionary<string, BigInteger> values)
+    {
+        _values.Clear();
+        foreach (var kv in values) _values[kv.Key] = kv.Value;
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
 }

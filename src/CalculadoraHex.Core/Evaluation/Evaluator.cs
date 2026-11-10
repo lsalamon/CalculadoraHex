@@ -13,7 +13,11 @@ public sealed class Evaluator
 
     public VariableStore Variables { get; }
 
-    public CalculationEntry Evaluate(string text, NumberBase inputBase)
+    public CalculationEntry Evaluate(string text, NumberBase inputBase) =>
+        Evaluate(text, inputBase, DateTimeOffset.Now);
+
+    /// <param name="timestamp">Momento original da linha (preservado ao recarregar uma sessão gravada).</param>
+    public CalculationEntry Evaluate(string text, NumberBase inputBase, DateTimeOffset timestamp)
     {
         ArgumentNullException.ThrowIfNull(text);
 
@@ -27,6 +31,7 @@ public sealed class Evaluator
 
             return new CalculationEntry
             {
+                Timestamp = timestamp,
                 InputBase = inputBase,
                 RawText = text,
                 AssignedVariable = statement.AssignedVariable,
@@ -38,6 +43,7 @@ public sealed class Evaluator
         {
             return new CalculationEntry
             {
+                Timestamp = timestamp,
                 InputBase = inputBase,
                 RawText = text,
                 Error = ex.Message,

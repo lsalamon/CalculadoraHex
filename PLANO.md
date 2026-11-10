@@ -138,7 +138,7 @@ Divisão é inteira (como em calculadoras de programador); divisão por zero ger
 
 - Cada linha avaliada é anexada à sessão em memória e o arquivo JSON é regravado (debounce de ~300 ms para não escrever a cada tecla).
 - Arquivo: `%LOCALAPPDATA%\CalculadoraHex\sessoes\<yyyy-MM-dd_HHmmss>.json`; a sessão atual também é apontada em `ultima.json`.
-- Ao iniciar, a app reabre a última sessão (configurável). `Arquivo > Abrir sessão…` lista as sessões gravadas.
+- Ao iniciar, a app reabre a última sessão. `Arquivo > Abrir sessão…` abre o diálogo de arquivos já na pasta de sessões.
 - Ao carregar, o `Evaluator` **re-executa** as entradas em ordem para reconstruir as variáveis, garantindo consistência mesmo que o formato evolua.
 - Gravação atômica (escreve em `.tmp` e renomeia) para não corromper em caso de queda.
 
@@ -176,7 +176,7 @@ Divisão é inteira (como em calculadoras de programador); divisão por zero ger
 - Estado de visibilidade salvo nas preferências do usuário.
 - **Entrega:** alternância sem perda de dados.
 
-### Fase 5 — Persistência automática (≈ 1 dia)
+### Fase 5 — Persistência automática (≈ 1 dia) — ✅ concluída em 2026-11-09
 - `SessionStore`: auto-save com debounce e gravação atômica.
 - Reabertura da última sessão; *Arquivo > Nova / Abrir / Salvar como / Exportar*.
 - Re-execução das entradas ao carregar; testes de ida e volta (salvar → carregar → mesmo estado).

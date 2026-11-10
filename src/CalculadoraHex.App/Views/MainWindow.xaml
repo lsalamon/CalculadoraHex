@@ -14,6 +14,9 @@
 
     <Window.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="N" Command="{Binding NewSessionCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="O" Command="{Binding OpenSessionCommand}" />
+        <KeyBinding Modifiers="Ctrl+Shift" Key="S" Command="{Binding SaveSessionAsCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="E" Command="{Binding ExportHistoryCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{Binding ClearDisplayCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="V" Command="{Binding ShowVariablesCommand}" />
     </Window.InputBindings>
@@ -23,9 +26,9 @@
         <Menu DockPanel.Dock="Top" KeyboardNavigation.TabNavigation="None">
             <MenuItem Header="_Arquivo">
                 <MenuItem Header="_Nova sessão" Command="{Binding NewSessionCommand}" InputGestureText="Ctrl+N" />
-                <MenuItem Header="_Abrir sessão..." IsEnabled="False" InputGestureText="Ctrl+O" ToolTip="Disponível na fase de persistência" />
-                <MenuItem Header="Salvar _como..." IsEnabled="False" ToolTip="Disponível na fase de persistência" />
-                <MenuItem Header="_Exportar histórico..." IsEnabled="False" ToolTip="Disponível na fase de persistência" />
+                <MenuItem Header="_Abrir sessão..." Command="{Binding OpenSessionCommand}" InputGestureText="Ctrl+O" />
+                <MenuItem Header="Salvar _como..." Command="{Binding SaveSessionAsCommand}" InputGestureText="Ctrl+Shift+S" />
+                <MenuItem Header="_Exportar histórico..." Command="{Binding ExportHistoryCommand}" InputGestureText="Ctrl+E" />
                 <Separator />
                 <MenuItem Header="Sai_r" Command="{Binding ExitCommand}" InputGestureText="Alt+F4" />
             </MenuItem>
@@ -58,7 +61,10 @@
                 <TextBlock Text="{Binding VariablesSummary}" Style="{StaticResource StatusTextStyle}" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="{Binding SessionName}" Style="{StaticResource StatusTextStyle}" />
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource StatusTextStyle}" Margin="0,0,16,0" Opacity="0.8" />
+                    <TextBlock Text="{Binding SessionName}" Style="{StaticResource StatusTextStyle}" />
+                </StackPanel>
             </StatusBarItem>
         </StatusBar>
 
