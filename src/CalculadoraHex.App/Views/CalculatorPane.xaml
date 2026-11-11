@@ -49,8 +49,18 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </StackPanel.Style>
-                                        <TextBlock Style="{StaticResource DisplayExpressionStyle}"
-                                                   views:SegmentedText.Segments="{Binding Segments}" />
+                                        <TextBlock views:SegmentedText.Segments="{Binding Segments}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayExpressionStyle}">
+                                                    <Style.Triggers>
+                                                        <!-- Impressão de variável: só o resultado, sem a linha da expressão -->
+                                                        <DataTrigger Binding="{Binding HasExpression}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                         <TextBlock Text="{Binding Result}">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayResultStyle}">

@@ -256,6 +256,16 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ShowHelp() => ShowHelpRequested?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>Imprime todas as variáveis no display, entre separadores (sem repetir o anterior se já houver um).</summary>
+    [RelayCommand]
+    private void PrintVariables()
+    {
+        var count = Session.PrintVariables();
+        StatusMessage = count == 0
+            ? "Nenhuma variável definida para imprimir."
+            : count == 1 ? "1 variável impressa no display." : $"{count} variáveis impressas no display.";
+    }
+
     [RelayCommand]
     private void ClearVariables()
     {

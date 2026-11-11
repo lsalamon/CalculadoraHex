@@ -53,8 +53,39 @@ public sealed class CalculationSession
         return entry;
     }
 
+    public CalculationEntry AddVariablePrint(string name, System.Numerics.BigInteger value) =>
+        AddVariablePrint(name, value, DateTimeOffset.Now);
+
+    public CalculationEntry AddVariablePrint(string name, System.Numerics.BigInteger value, DateTimeOffset timestamp)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        var entry = CalculationEntry.CreateVariablePrint(name, value, timestamp);
+        Add(entry);
+        return entry;
+    }
+
     /// <summary>
-    /// Apaga a última linha (cálculo ou separador). As variáveis são recalculadas reavaliando o que sobrou,
+    /// Imprime todas as variáveis no histórico, em ordem alfabética, entre linhas separadoras.
+    /// O separador anterior não é repetido se a última linha já for um. Retorna quantas variáveis foram impressas.
+    /// </summary>
+    public int PrintVariables()
+    {
+        var snapshot = Variables.Snapshot();
+        if (snapshot.Count == 0) return 0;
+
+        if (_entries.Count == 0 || !_entries[^1].IsSeparator)
+            AddSeparator();
+
+        var now = DateTimeOffset.Now;
+        foreach (var kv in snapshot.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
+            AddVariablePrint(kv.Key, kv.Value, now);
+
+        AddSeparator();
+        return snapshot.Count;
+    }
+
+    /// <summary>
+    /// Apaga a última linha (cálculo, separador ou impressão de variável). As variáveis são recalculadas reavaliando o que sobrou,
     /// de modo que uma atribuição apagada deixa de valer. Retorna falso se não havia linha.
     /// </summary>
     public bool RemoveLast()
@@ -91,7 +122,7 @@ public sealed class CalculationSession
 
         foreach (var old in previous)
         {
-            _entries.Add(old.IsSeparator
+            _entries.Add(old.IsStatic
                 ? old
                 : _evaluator.Evaluate(old.RawText, old.InputBase, old.Timestamp));
         }

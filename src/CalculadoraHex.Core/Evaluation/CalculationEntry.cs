@@ -11,6 +11,9 @@ public enum EntryKind
 
     /// <summary>Linha tracejada inserida pelo usuário para separar blocos do histórico.</summary>
     Separator,
+
+    /// <summary>Linha "nome = valor" gerada por Variáveis > Imprimir no display; guarda o valor daquele momento.</summary>
+    VariablePrint,
 }
 
 /// <summary>
@@ -44,6 +47,13 @@ public sealed class CalculationEntry
     public bool IsSeparator => Kind == EntryKind.Separator;
 
     [JsonIgnore]
+    public bool IsVariablePrint => Kind == EntryKind.VariablePrint;
+
+    /// <summary>Linhas que não são reavaliadas ao reconstruir o histórico (separadores e impressões).</summary>
+    [JsonIgnore]
+    public bool IsStatic => Kind != EntryKind.Calculation;
+
+    [JsonIgnore]
     public bool Succeeded => Kind == EntryKind.Calculation && Error is null && Value.HasValue;
 
     public static CalculationEntry CreateSeparator(DateTimeOffset timestamp) => new()
@@ -51,5 +61,14 @@ public sealed class CalculationEntry
         Kind = EntryKind.Separator,
         Timestamp = timestamp,
         RawText = string.Empty,
+    };
+
+    public static CalculationEntry CreateVariablePrint(string name, BigInteger value, DateTimeOffset timestamp) => new()
+    {
+        Kind = EntryKind.VariablePrint,
+        Timestamp = timestamp,
+        RawText = name,
+        AssignedVariable = name,
+        Value = value,
     };
 }

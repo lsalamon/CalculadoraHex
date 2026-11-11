@@ -20,6 +20,7 @@
         <KeyBinding Modifiers="Ctrl" Key="I" Command="{Binding ImportHistoryCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding DeleteLastLineCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="T" Command="{Binding InsertSeparatorCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="P" Command="{Binding PrintVariablesCommand}" />
         <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{Binding ClearDisplayCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="V" Command="{Binding ShowVariablesCommand}" />
@@ -53,6 +54,9 @@
             </MenuItem>
             <MenuItem Header="_Variáveis">
                 <MenuItem Header="_Listar / remover..." Command="{Binding ShowVariablesCommand}" InputGestureText="Ctrl+Shift+V" />
+                <MenuItem Header="_Imprimir no display" Command="{Binding PrintVariablesCommand}" InputGestureText="Ctrl+P"
+                          ToolTip="Acrescenta ao histórico uma linha por variável, entre linhas separadoras" />
+                <Separator />
                 <MenuItem Header="Limpar _todas" Command="{Binding ClearVariablesCommand}" />
             </MenuItem>
             <!-- Cada item insere o símbolo na linha de entrada que estava com o foco -->

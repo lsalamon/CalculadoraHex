@@ -9,10 +9,19 @@ public sealed record DisplayLine(Guid EntryId, IReadOnlyList<TextSegment> Segmen
 {
     public string Expression => string.Concat(Segments.Select(s => s.Text));
 
+    /// <summary>Falso em linhas só de resultado (impressão de variável): o display não reserva a linha da expressão.</summary>
+    public bool HasExpression => Segments.Count > 0;
+
     public static DisplayLine From(CalculationEntry entry, NumberBase paneBase)
     {
         if (entry.IsSeparator)
             return new DisplayLine(entry.Id, Array.Empty<TextSegment>(), string.Empty, IsError: false, IsSeparator: true);
+
+        if (entry.IsVariablePrint && entry.Value is { } printed)
+        {
+            var text = $"{entry.RawText} = {NumberFormatter.Format(printed, paneBase)}";
+            return new DisplayLine(entry.Id, Array.Empty<TextSegment>(), text, IsError: false);
+        }
 
         if (entry.Succeeded && entry.Statement is not null)
         {

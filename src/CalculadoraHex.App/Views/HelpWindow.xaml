@@ -51,7 +51,7 @@
                 <TextBlock Style="{StaticResource P}" Text="+  -  *  /  com a precedência usual, parênteses para agrupar e - unário. A divisão é inteira (trunca em direção a zero). Divisão por zero mostra ERRO sem alterar variáveis. Não há limite de tamanho: os números são inteiros de precisão arbitrária." />
 
                 <TextBlock Style="{StaticResource H}" Text="Variáveis" />
-                <TextBlock Style="{StaticResource P}" Text="Nome começa por letra ou _ e não diferencia maiúsculas. Uma linha com erro nunca altera variáveis. A barra de status e o menu Variáveis mostram cada valor nas duas bases." />
+                <TextBlock Style="{StaticResource P}" Text="Nome começa por letra ou _ e não diferencia maiúsculas. Uma linha com erro nunca altera variáveis. A barra de status e o menu Variáveis mostram cada valor nas duas bases. Variáveis > Imprimir no display (Ctrl+P) acrescenta ao histórico uma linha por variável, em ordem alfabética, entre linhas separadoras (sem repetir a anterior se já houver uma); essas linhas guardam o valor daquele momento, são gravadas e podem ser apagadas com Ctrl+D." />
 
                 <TextBlock Style="{StaticResource H}" Text="Ambiguidade no painel hexa" />
                 <TextBlock Style="{StaticResource P}" Text="Palavras como a, b, cafe são dígitos hexa e também nomes possíveis. Regra: se existe uma variável com esse nome, é variável; senão, é número. O display sublinha o token quando a regra foi aplicada. Para forçar:" />
@@ -88,7 +88,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                         <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                        <RowDefinition /><RowDefinition /><RowDefinition />
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Style="{StaticResource Code}" Text="Enter" /><TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource P}" Text="Avalia a linha" />
                     <TextBlock Grid.Row="1" Style="{StaticResource Code}" Text="Esc" /><TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource P}" Text="Limpa a linha de entrada" />
@@ -103,8 +103,9 @@
                     <TextBlock Grid.Row="10" Style="{StaticResource Code}" Text="Ctrl+E" /><TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource P}" Text="Exportar histórico em texto" />
                     <TextBlock Grid.Row="11" Style="{StaticResource Code}" Text="Ctrl+I" /><TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource P}" Text="Importar histórico (sessão .json ou script .txt)" />
                     <TextBlock Grid.Row="12" Style="{StaticResource Code}" Text="Ctrl+Shift+V" /><TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource P}" Text="Janela de variáveis" />
-                    <TextBlock Grid.Row="13" Style="{StaticResource Code}" Text="F1" /><TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource P}" Text="Esta ajuda" />
-                    <TextBlock Grid.Row="14" Style="{StaticResource Code}" Text="Alt+F4" /><TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource P}" Text="Sair (a sessão já está gravada)" />
+                    <TextBlock Grid.Row="13" Style="{StaticResource Code}" Text="Ctrl+P" /><TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource P}" Text="Imprime todas as variáveis no display" />
+                    <TextBlock Grid.Row="14" Style="{StaticResource Code}" Text="F1" /><TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource P}" Text="Esta ajuda" />
+                    <TextBlock Grid.Row="15" Style="{StaticResource Code}" Text="Alt+F4" /><TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource P}" Text="Sair (a sessão já está gravada)" />
                 </Grid>
             </StackPanel>
         </ScrollViewer>

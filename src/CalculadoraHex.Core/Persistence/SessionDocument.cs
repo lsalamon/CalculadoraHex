@@ -23,9 +23,11 @@ public sealed class EntryDocument
 {
     public const string SeparatorKind = "sep";
 
+    public const string VariablePrintKind = "var";
+
     public DateTimeOffset Timestamp { get; set; }
 
-    /// <summary>"sep" para linha separadora; ausente ou nulo para cálculo.</summary>
+    /// <summary>"sep" para linha separadora, "var" para impressão de variável; ausente ou nulo para cálculo.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Kind { get; set; }
 
@@ -41,4 +43,7 @@ public sealed class EntryDocument
 
     [JsonIgnore]
     public bool IsSeparator => string.Equals(Kind, SeparatorKind, StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
+    public bool IsVariablePrint => string.Equals(Kind, VariablePrintKind, StringComparison.OrdinalIgnoreCase);
 }

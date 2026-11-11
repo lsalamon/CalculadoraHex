@@ -74,6 +74,11 @@ public sealed class SessionStore
         {
             if (entry.IsSeparator)
                 session.AddSeparator(entry.Timestamp);
+            else if (entry.IsVariablePrint)
+            {
+                if (TryParseValue(entry.Value, out var printed) && !string.IsNullOrWhiteSpace(entry.Text))
+                    session.AddVariablePrint(entry.Text, printed, entry.Timestamp);
+            }
             else
                 session.Evaluate(entry.Text, ParseBase(entry.Base), entry.Timestamp);
         }
@@ -81,11 +86,14 @@ public sealed class SessionStore
         var variables = new Dictionary<string, BigInteger>(StringComparer.OrdinalIgnoreCase);
         foreach (var kv in document.Variables)
         {
-            if (BigInteger.TryParse(kv.Value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out var value))
+            if (TryParseValue(kv.Value, out var value))
                 variables[kv.Key] = value;
         }
         session.Variables.ReplaceAll(variables);
     }
+
+    internal static bool TryParseValue(string? text, out BigInteger value) =>
+        BigInteger.TryParse(text ?? string.Empty, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out value);
 
     public SessionDocument Read(string path)
     {
@@ -162,6 +170,12 @@ public sealed class SessionStore
                 continue;
             }
 
+            if (entry.IsVariablePrint)
+            {
+                sb.AppendLine($"{ResultText(entry, NumberBase.Hexadecimal),40}  {ResultText(entry, NumberBase.Decimal),40}");
+                continue;
+            }
+
             if (entry.Succeeded && entry.Statement is not null)
             {
                 sb.AppendLine($"{ExpressionPrinter.Print(entry.Statement, NumberBase.Hexadecimal),-40}  {ExpressionPrinter.Print(entry.Statement, NumberBase.Decimal),-40}");
@@ -208,7 +222,12 @@ public sealed class SessionStore
             doc.Entries.Add(new EntryDocument
             {
                 Timestamp = e.Timestamp,
-                Kind = e.IsSeparator ? EntryDocument.SeparatorKind : null,
+                Kind = e.Kind switch
+                {
+                    EntryKind.Separator => EntryDocument.SeparatorKind,
+                    EntryKind.VariablePrint => EntryDocument.VariablePrintKind,
+                    _ => null,
+                },
                 Base = e.InputBase == NumberBase.Hexadecimal ? "hex" : "dec",
                 Text = e.RawText,
                 Value = e.Value?.ToString(CultureInfo.InvariantCulture),

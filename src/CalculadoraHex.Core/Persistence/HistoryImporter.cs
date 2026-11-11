@@ -1,12 +1,23 @@
+using System.Numerics;
 using CalculadoraHex.Core.Evaluation;
 
 namespace CalculadoraHex.Core.Persistence;
 
-/// <summary>Uma linha a importar: expressão (com base) ou separador.</summary>
-public sealed record ImportItem(string Text, NumberBase Base, DateTimeOffset? Timestamp = null, bool IsSeparator = false)
+/// <summary>Uma linha a importar: expressão (com base), separador ou impressão de variável (nome + valor).</summary>
+public sealed record ImportItem(
+    string Text,
+    NumberBase Base,
+    DateTimeOffset? Timestamp = null,
+    bool IsSeparator = false,
+    BigInteger? PrintedValue = null)
 {
+    public bool IsVariablePrint => PrintedValue.HasValue;
+
     public static ImportItem Separator(DateTimeOffset? timestamp = null) =>
         new(string.Empty, NumberBase.Decimal, timestamp, IsSeparator: true);
+
+    public static ImportItem VariablePrint(string name, BigInteger value, DateTimeOffset? timestamp = null) =>
+        new(name, NumberBase.Decimal, timestamp, PrintedValue: value);
 }
 
 /// <param name="Imported">Linhas acrescentadas à sessão (cálculos, com ou sem erro, e separadores).</param>
@@ -67,6 +78,11 @@ public static class HistoryImporter
             {
                 items.Add(ImportItem.Separator(at));
             }
+            else if (e.IsVariablePrint)
+            {
+                if (SessionStore.TryParseValue(e.Value, out var printed) && !string.IsNullOrWhiteSpace(e.Text))
+                    items.Add(ImportItem.VariablePrint(e.Text, printed, at));
+            }
             else if (!string.IsNullOrWhiteSpace(e.Text))
             {
                 var b = string.Equals(e.Base, "hex", StringComparison.OrdinalIgnoreCase) ? NumberBase.Hexadecimal : NumberBase.Decimal;
@@ -90,6 +106,14 @@ public static class HistoryImporter
             {
                 if (item.Timestamp is { } sepAt) session.AddSeparator(sepAt);
                 else session.AddSeparator();
+                imported++;
+                continue;
+            }
+
+            if (item.IsVariablePrint)
+            {
+                if (item.Timestamp is { } printAt) session.AddVariablePrint(item.Text, item.PrintedValue!.Value, printAt);
+                else session.AddVariablePrint(item.Text, item.PrintedValue!.Value);
                 imported++;
                 continue;
             }
