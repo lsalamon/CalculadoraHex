@@ -9,9 +9,16 @@ public sealed record ImportItem(
     NumberBase Base,
     DateTimeOffset? Timestamp = null,
     bool IsSeparator = false,
-    BigInteger? PrintedValue = null)
+    BigInteger? PrintedValue = null,
+    bool BaseIsExplicit = false)
 {
     public bool IsVariablePrint => PrintedValue.HasValue;
+
+    /// <summary>
+    /// Verdadeiro quando a linha é uma expressão cuja base só a escolha do usuário define
+    /// (sem prefixo de base). Comentários, separadores e impressões de variável não dependem de base.
+    /// </summary>
+    public bool NeedsBase => !IsSeparator && !IsVariablePrint && !BaseIsExplicit && !Text.StartsWith('#');
 
     public static ImportItem Separator(DateTimeOffset? timestamp = null) =>
         new(string.Empty, NumberBase.Decimal, timestamp, IsSeparator: true);
@@ -51,11 +58,19 @@ public static class HistoryImporter
             if (line.Length == 0) continue;
             if (IgnoredPrefixes.Any(p => line.StartsWith(p, StringComparison.Ordinal))) continue;
 
-            // '#' vai como está: a sessão o reconhece como comentário ao avaliar a linha.
+            // '#' vai como está (inclusive um ';' no texto): a sessão o reconhece como comentário ao avaliar a linha.
             if (line.StartsWith('#'))
             {
                 items.Add(new ImportItem(line, defaultBase));
                 continue;
+            }
+
+            // Anotação no fim da linha: expressões não têm ';', então o que vem depois é só comentário.
+            var semicolon = line.IndexOf(';');
+            if (semicolon >= 0)
+            {
+                line = line[..semicolon].TrimEnd();
+                if (line.Length == 0) continue;
             }
 
             if (IsSeparatorLine(line))
@@ -64,12 +79,18 @@ public static class HistoryImporter
                 continue;
             }
 
+            if (TryParseVariablePrint(line, out var printName, out var printValue))
+            {
+                items.Add(ImportItem.VariablePrint(printName, printValue));
+                continue;
+            }
+
             var numberBase = defaultBase;
-            if (TryStripBasePrefix(ref line, out var explicitBase))
-                numberBase = explicitBase;
+            var explicitBase = TryStripBasePrefix(ref line, out var prefixBase);
+            if (explicitBase) numberBase = prefixBase;
 
             if (line.Length == 0) continue;
-            items.Add(new ImportItem(line, numberBase));
+            items.Add(new ImportItem(line, numberBase, BaseIsExplicit: explicitBase));
         }
         return items;
     }
@@ -137,6 +158,30 @@ public static class HistoryImporter
     }
 
     private static bool IsSeparatorLine(string line) => line.Length >= 3 && line.All(c => c == '-');
+
+    /// <summary>Reconhece <c>[var] nome = valor</c> (valor decimal inteiro), o formato que a exportação usa para variáveis impressas.</summary>
+    private static bool TryParseVariablePrint(string line, out string name, out BigInteger value)
+    {
+        name = string.Empty;
+        value = default;
+
+        const string prefix = "[var]";
+        if (!line.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return false;
+
+        var rest = line[prefix.Length..];
+        var equals = rest.IndexOf('=');
+        if (equals < 0) return false;
+
+        var candidate = rest[..equals].Trim();
+        if (!Parsing.Parser.IsIdentifier(candidate)) return false;
+
+        if (!BigInteger.TryParse(rest[(equals + 1)..].Trim(), System.Globalization.NumberStyles.AllowLeadingSign,
+                System.Globalization.CultureInfo.InvariantCulture, out value))
+            return false;
+
+        name = candidate;
+        return true;
+    }
 
     private static bool TryStripBasePrefix(ref string line, out NumberBase numberBase)
     {

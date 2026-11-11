@@ -32,7 +32,8 @@ Cada operação é gravada em `%LOCALAPPDATA%\CalculadoraHex\sessoes\<data_hora>
 **Arquivo > Importar histórico** (Ctrl+I) acrescenta operações à sessão atual, sem apagar nada. Aceita:
 
 - uma sessão gravada (`.json`), cujas linhas são reavaliadas na ordem e na base originais;
-- um script de texto (`.txt`) com uma expressão por linha. Prefixos `[hex]`, `[dec]`, `hex:` ou `dec:` fixam a base da linha; sem prefixo vale a base escolhida no diálogo. Linhas iniciadas por `#` viram comentários no histórico; as iniciadas por `;` ou `//` são ignoradas; uma linha só de traços (`---`) vira separador.
+- o texto gerado por **Exportar histórico** (`.txt`): cada linha traz `[hex]` ou `[dec]` e, depois de `;`, uma anotação com a expressão e o resultado nas duas bases. Importa de volta sem perguntar a base. Linhas que deram erro saem só como anotação e não são reproduzidas;
+- um script de texto (`.txt`) com uma expressão por linha. Prefixos `[hex]`, `[dec]`, `hex:` ou `dec:` fixam a base da linha; sem prefixo vale a base escolhida no diálogo. Linhas iniciadas por `#` viram comentários no histórico; as iniciadas por `;` ou `//` são ignoradas, e o que vem depois de `;` no fim de uma linha é só anotação; uma linha só de traços (`---`) vira separador; `[var] nome = valor` recria uma variável impressa.
 
 ```text
 # script.txt

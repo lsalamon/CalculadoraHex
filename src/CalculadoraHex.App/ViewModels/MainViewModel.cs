@@ -148,7 +148,7 @@ public sealed partial class MainViewModel : ObservableObject
         var dialog = new OpenFileDialog
         {
             Title = "Importar histórico",
-            Filter = "Sessão ou script (*.json;*.txt)|*.json;*.txt|Sessão CalculadoraHex (*.json)|*.json|Script de texto (*.txt)|*.txt|Todos os arquivos (*.*)|*.*",
+            Filter = "Sessão (.json) ou texto exportado (.txt)|*.json;*.txt|Sessão CalculadoraHex (*.json)|*.json|Texto / script (*.txt)|*.txt|Todos os arquivos (*.*)|*.*",
             InitialDirectory = EnsureDirectory(Sessions.SessionsDirectory),
             CheckFileExists = true,
         };
@@ -163,9 +163,16 @@ public sealed partial class MainViewModel : ObservableObject
             }
             else
             {
-                var chosen = AskImportBase?.Invoke(ActiveBase);
-                if (chosen is null) return;
-                items = HistoryImporter.ParseScript(File.ReadAllText(dialog.FileName), chosen.Value);
+                var content = File.ReadAllText(dialog.FileName);
+                items = HistoryImporter.ParseScript(content, ActiveBase);
+
+                // Arquivo exportado pela própria app: toda linha já traz [hex]/[dec], então não há o que perguntar.
+                if (items.Any(i => i.NeedsBase))
+                {
+                    var chosen = AskImportBase?.Invoke(ActiveBase);
+                    if (chosen is null) return;
+                    items = HistoryImporter.ParseScript(content, chosen.Value);
+                }
             }
 
             if (items.Count == 0)

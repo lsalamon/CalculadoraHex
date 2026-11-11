@@ -155,64 +155,69 @@ public sealed class SessionStore
         File.WriteAllText(LastSessionPointerPath, path, Encoding.UTF8);
     }
 
-    /// <summary>Exporta o histórico em texto legível, com cada linha nas duas bases.</summary>
+    /// <summary>
+    /// Exporta o histórico como um script de texto que <see cref="HistoryImporter.ParseScript"/> lê de volta.
+    /// Cada linha de cálculo sai com o prefixo da sua base (<c>[hex]</c> ou <c>[dec]</c>) e, depois de <c>;</c>,
+    /// uma anotação de leitura com a expressão e o resultado nas duas bases; a anotação é ignorada ao importar.
+    /// Comentários saem como foram digitados, separadores como linha de traços e variáveis impressas como
+    /// <c>[var] nome = valor</c>. Linhas que deram erro saem só como anotação, para não serem reproduzidas.
+    /// </summary>
     public static string ExportText(CalculationSession session)
     {
         ArgumentNullException.ThrowIfNull(session);
         var sb = new StringBuilder();
-        sb.AppendLine("CalculadoraHex - histórico");
-        sb.AppendLine($"Sessão criada em {session.CreatedAt:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine("; CalculadoraHex - histórico");
+        sb.AppendLine($"; Sessão criada em {session.CreatedAt:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine("; Reimportável em Arquivo > Importar histórico. O que vem depois de ';' é só anotação.");
         sb.AppendLine();
-        sb.AppendLine($"{"Hexadecimal",-40}  {"Decimal",-40}");
-        sb.AppendLine(new string('-', 82));
 
         foreach (var entry in session.Entries)
         {
             if (entry.IsSeparator)
             {
                 sb.AppendLine(SeparatorLine);
-                sb.AppendLine();
-                continue;
             }
-
-            if (entry.IsComment)
+            else if (entry.IsComment)
             {
                 sb.AppendLine(entry.RawText);
-                continue;
             }
-
-            if (entry.IsVariablePrint)
+            else if (entry.IsVariablePrint)
             {
-                sb.AppendLine($"{ResultText(entry, NumberBase.Hexadecimal),40}  {ResultText(entry, NumberBase.Decimal),40}");
-                continue;
+                var value = entry.Value!.Value;
+                sb.AppendLine(Annotate(
+                    $"[var] {entry.RawText} = {NumberFormatter.Format(value, NumberBase.Decimal)}",
+                    $"hex: {entry.RawText} = {NumberFormatter.Format(value, NumberBase.Hexadecimal)} | dec: {entry.RawText} = {NumberFormatter.Format(value, NumberBase.Decimal)}"));
             }
-
-            if (entry.Succeeded && entry.Statement is not null)
+            else if (entry.Succeeded && entry.Statement is not null)
             {
-                sb.AppendLine($"{ExpressionPrinter.Print(entry.Statement, NumberBase.Hexadecimal),-40}  {ExpressionPrinter.Print(entry.Statement, NumberBase.Decimal),-40}");
-                var hex = ResultText(entry, NumberBase.Hexadecimal);
-                var dec = ResultText(entry, NumberBase.Decimal);
-                sb.AppendLine($"{hex,40}  {dec,40}");
+                var hexExpr = ExpressionPrinter.Print(entry.Statement, NumberBase.Hexadecimal);
+                var decExpr = ExpressionPrinter.Print(entry.Statement, NumberBase.Decimal);
+                sb.AppendLine(Annotate(
+                    $"{BasePrefix(entry.InputBase)} {entry.RawText}",
+                    $"hex: {hexExpr} => {ResultText(entry, NumberBase.Hexadecimal)} | dec: {decExpr} => {ResultText(entry, NumberBase.Decimal)}"));
             }
             else
             {
-                var tag = entry.InputBase == NumberBase.Hexadecimal ? "hex" : "dec";
-                sb.AppendLine($"[{tag}] {entry.RawText}");
-                sb.AppendLine($"{"ERRO: " + entry.Error,82}");
+                sb.AppendLine($"; {BasePrefix(entry.InputBase)} {entry.RawText}  -> ERRO: {entry.Error}");
             }
-            sb.AppendLine();
         }
 
         var vars = session.Variables.Snapshot();
         if (vars.Count > 0)
         {
-            sb.AppendLine("Variáveis:");
+            sb.AppendLine();
+            sb.AppendLine("; Variáveis ao final:");
             foreach (var kv in vars.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
-                sb.AppendLine($"  {kv.Key} = {NumberFormatter.Format(kv.Value, NumberBase.Hexadecimal)}h = {NumberFormatter.Format(kv.Value, NumberBase.Decimal)}");
+                sb.AppendLine($";   {kv.Key} = {NumberFormatter.Format(kv.Value, NumberBase.Hexadecimal)}h = {NumberFormatter.Format(kv.Value, NumberBase.Decimal)}");
         }
 
         return sb.ToString();
     }
+
+    private static string BasePrefix(NumberBase numberBase) => numberBase == NumberBase.Hexadecimal ? "[hex]" : "[dec]";
+
+    /// <summary>Alinha a parte importável em uma coluna fixa e acrescenta a anotação depois de ';'.</summary>
+    private static string Annotate(string script, string note) => $"{script,-34} ; {note}";
 
     private static string ResultText(CalculationEntry entry, NumberBase numberBase)
     {
