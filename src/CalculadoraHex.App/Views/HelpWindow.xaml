@@ -32,7 +32,8 @@
     </Window.Resources>
 
     <DockPanel Margin="12">
-        <Button DockPanel.Dock="Bottom" Content="_Fechar" IsCancel="True" HorizontalAlignment="Right" MinWidth="80" Padding="8,4" Margin="0,10,0,0" />
+        <!-- A janela abre com Show() (não modal), então IsCancel sozinho não fecha: precisa do Click. -->
+        <Button DockPanel.Dock="Bottom" Content="_Fechar" IsCancel="True" Click="OnCloseClick" HorizontalAlignment="Right" MinWidth="80" Padding="8,4" Margin="0,10,0,0" />
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
@@ -64,8 +65,11 @@
                 <TextBlock Style="{StaticResource H}" Text="Sessões" />
                 <TextBlock Style="{StaticResource P}" Text="Tudo é gravado automaticamente em %LOCALAPPDATA%\CalculadoraHex\sessoes. Ao abrir, a última sessão volta com histórico e variáveis. Use Arquivo para iniciar outra, abrir uma antiga, salvar com outro nome ou exportar o histórico em texto." />
 
+                <TextBlock Style="{StaticResource H}" Text="Editar o histórico" />
+                <TextBlock Style="{StaticResource P}" Text="Editar > Apagar última linha (Ctrl+D) remove a última linha, seja cálculo ou separador, e recalcula as variáveis reavaliando o que sobrou: uma atribuição apagada deixa de valer. Editar > Inserir linha separadora (Ctrl+T) acrescenta uma linha tracejada nos dois painéis, útil para marcar blocos; ela também é gravada e exportada." />
+
                 <TextBlock Style="{StaticResource H}" Text="Importar histórico" />
-                <TextBlock Style="{StaticResource P}" Text="Arquivo > Importar histórico acrescenta operações à sessão atual, sem apagar nada. Aceita uma sessão gravada (.json) ou um script de texto com uma expressão por linha. No script, prefixos [hex], [dec], hex: ou dec: fixam a base da linha; sem prefixo vale a base escolhida no diálogo. Linhas iniciadas por #, ; ou // são comentários." />
+                <TextBlock Style="{StaticResource P}" Text="Arquivo > Importar histórico acrescenta operações à sessão atual, sem apagar nada. Aceita uma sessão gravada (.json) ou um script de texto com uma expressão por linha. No script, prefixos [hex], [dec], hex: ou dec: fixam a base da linha; sem prefixo vale a base escolhida no diálogo. Linhas iniciadas por #, ; ou // são comentários; uma linha só de traços (---) vira separador." />
                 <Border Style="{StaticResource DisplayBorderStyle}" Padding="10,6">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Code}" Text="# script.txt" />
@@ -84,21 +88,23 @@
                     <Grid.RowDefinitions>
                         <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                         <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                        <RowDefinition />
+                        <RowDefinition /><RowDefinition /><RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Style="{StaticResource Code}" Text="Enter" /><TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource P}" Text="Avalia a linha" />
                     <TextBlock Grid.Row="1" Style="{StaticResource Code}" Text="Esc" /><TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource P}" Text="Limpa a linha de entrada" />
                     <TextBlock Grid.Row="2" Style="{StaticResource Code}" Text="Tab" /><TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource P}" Text="Alterna entre o painel hexa e o decimal" />
                     <TextBlock Grid.Row="3" Style="{StaticResource Code}" Text="Ctrl+1 / Ctrl+2" /><TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource P}" Text="Oculta ou exibe o painel hexa / decimal" />
-                    <TextBlock Grid.Row="4" Style="{StaticResource Code}" Text="Ctrl+L" /><TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource P}" Text="Limpa o display (o histórico gravado permanece)" />
-                    <TextBlock Grid.Row="5" Style="{StaticResource Code}" Text="Ctrl+N" /><TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource P}" Text="Nova sessão" />
-                    <TextBlock Grid.Row="6" Style="{StaticResource Code}" Text="Ctrl+O" /><TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource P}" Text="Abrir sessão" />
-                    <TextBlock Grid.Row="7" Style="{StaticResource Code}" Text="Ctrl+Shift+S" /><TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource P}" Text="Salvar sessão como" />
-                    <TextBlock Grid.Row="8" Style="{StaticResource Code}" Text="Ctrl+E" /><TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource P}" Text="Exportar histórico em texto" />
-                    <TextBlock Grid.Row="9" Style="{StaticResource Code}" Text="Ctrl+I" /><TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource P}" Text="Importar histórico (sessão .json ou script .txt)" />
-                    <TextBlock Grid.Row="10" Style="{StaticResource Code}" Text="Ctrl+Shift+V" /><TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource P}" Text="Janela de variáveis" />
-                    <TextBlock Grid.Row="11" Style="{StaticResource Code}" Text="F1" /><TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource P}" Text="Esta ajuda" />
-                    <TextBlock Grid.Row="12" Style="{StaticResource Code}" Text="Alt+F4" /><TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource P}" Text="Sair (a sessão já está gravada)" />
+                    <TextBlock Grid.Row="4" Style="{StaticResource Code}" Text="Ctrl+D" /><TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource P}" Text="Apaga a última linha do histórico" />
+                    <TextBlock Grid.Row="5" Style="{StaticResource Code}" Text="Ctrl+T" /><TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource P}" Text="Insere uma linha separadora tracejada" />
+                    <TextBlock Grid.Row="6" Style="{StaticResource Code}" Text="Ctrl+L" /><TextBlock Grid.Row="6" Grid.Column="1" Style="{StaticResource P}" Text="Limpa o display (o histórico gravado permanece)" />
+                    <TextBlock Grid.Row="7" Style="{StaticResource Code}" Text="Ctrl+N" /><TextBlock Grid.Row="7" Grid.Column="1" Style="{StaticResource P}" Text="Nova sessão" />
+                    <TextBlock Grid.Row="8" Style="{StaticResource Code}" Text="Ctrl+O" /><TextBlock Grid.Row="8" Grid.Column="1" Style="{StaticResource P}" Text="Abrir sessão" />
+                    <TextBlock Grid.Row="9" Style="{StaticResource Code}" Text="Ctrl+Shift+S" /><TextBlock Grid.Row="9" Grid.Column="1" Style="{StaticResource P}" Text="Salvar sessão como" />
+                    <TextBlock Grid.Row="10" Style="{StaticResource Code}" Text="Ctrl+E" /><TextBlock Grid.Row="10" Grid.Column="1" Style="{StaticResource P}" Text="Exportar histórico em texto" />
+                    <TextBlock Grid.Row="11" Style="{StaticResource Code}" Text="Ctrl+I" /><TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource P}" Text="Importar histórico (sessão .json ou script .txt)" />
+                    <TextBlock Grid.Row="12" Style="{StaticResource Code}" Text="Ctrl+Shift+V" /><TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource P}" Text="Janela de variáveis" />
+                    <TextBlock Grid.Row="13" Style="{StaticResource Code}" Text="F1" /><TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource P}" Text="Esta ajuda" />
+                    <TextBlock Grid.Row="14" Style="{StaticResource Code}" Text="Alt+F4" /><TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource P}" Text="Sair (a sessão já está gravada)" />
                 </Grid>
             </StackPanel>
         </ScrollViewer>

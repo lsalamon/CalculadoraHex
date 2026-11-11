@@ -33,6 +33,11 @@ public sealed partial class MainViewModel : ObservableObject
             HexPane.ClearLines();
             DecimalPane.ClearLines();
         };
+        Session.HistoryReplaced += (_, _) =>
+        {
+            HexPane.Rebuild(Session.Entries);
+            DecimalPane.Rebuild(Session.Entries);
+        };
         Session.Variables.Changed += (_, _) => UpdateVariablesSummary();
 
         Sessions.CurrentPathChanged += (_, _) => UpdateSessionName();
@@ -202,6 +207,31 @@ public sealed partial class MainViewModel : ObservableObject
         {
             MessageBox.Show("Não foi possível exportar.\n\n" + ex.Message, "Exportar histórico", MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    /// <summary>Apaga a última linha do histórico (cálculo ou separador) e recalcula as variáveis.</summary>
+    [RelayCommand]
+    private void DeleteLastLine()
+    {
+        if (Session.Entries.Count == 0)
+        {
+            StatusMessage = "Não há linha para apagar.";
+            return;
+        }
+
+        var last = Session.Entries[^1];
+        Session.RemoveLast();
+        StatusMessage = last.IsSeparator
+            ? "Linha separadora apagada."
+            : $"Linha apagada: {last.RawText}";
+    }
+
+    /// <summary>Insere uma linha tracejada separadora no fim do histórico.</summary>
+    [RelayCommand]
+    private void InsertSeparator()
+    {
+        Session.AddSeparator();
+        StatusMessage = "Linha separadora inserida.";
     }
 
     /// <summary>Limpa apenas o que está visível; o histórico da sessão permanece.</summary>

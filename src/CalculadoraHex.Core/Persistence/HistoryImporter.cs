@@ -2,10 +2,14 @@ using CalculadoraHex.Core.Evaluation;
 
 namespace CalculadoraHex.Core.Persistence;
 
-/// <summary>Uma operação a importar: texto, base em que deve ser lida e, se conhecido, o momento original.</summary>
-public sealed record ImportItem(string Text, NumberBase Base, DateTimeOffset? Timestamp = null);
+/// <summary>Uma linha a importar: expressão (com base) ou separador.</summary>
+public sealed record ImportItem(string Text, NumberBase Base, DateTimeOffset? Timestamp = null, bool IsSeparator = false)
+{
+    public static ImportItem Separator(DateTimeOffset? timestamp = null) =>
+        new(string.Empty, NumberBase.Decimal, timestamp, IsSeparator: true);
+}
 
-/// <param name="Imported">Linhas acrescentadas à sessão (com ou sem erro de cálculo).</param>
+/// <param name="Imported">Linhas acrescentadas à sessão (cálculos, com ou sem erro, e separadores).</param>
 /// <param name="Failed">Dessas, quantas resultaram em erro de cálculo.</param>
 public sealed record ImportResult(int Imported, int Failed);
 
@@ -20,7 +24,8 @@ public static class HistoryImporter
     /// <summary>
     /// Lê um script de texto. Cada linha não vazia é uma expressão. Prefixos <c>[hex]</c>, <c>[dec]</c>,
     /// <c>hex:</c> ou <c>dec:</c> fixam a base da linha; sem prefixo vale <paramref name="defaultBase"/>.
-    /// Linhas iniciadas por <c>#</c>, <c>;</c> ou <c>//</c> são comentários.
+    /// Linhas iniciadas por <c>#</c>, <c>;</c> ou <c>//</c> são comentários. Uma linha só de traços
+    /// (<c>---</c>, três ou mais) vira separador.
     /// </summary>
     public static IReadOnlyList<ImportItem> ParseScript(string content, NumberBase defaultBase)
     {
@@ -32,6 +37,12 @@ public static class HistoryImporter
             var line = rawLine.Trim();
             if (line.Length == 0) continue;
             if (CommentPrefixes.Any(p => line.StartsWith(p, StringComparison.Ordinal))) continue;
+
+            if (IsSeparatorLine(line))
+            {
+                items.Add(ImportItem.Separator());
+                continue;
+            }
 
             var numberBase = defaultBase;
             if (TryStripBasePrefix(ref line, out var explicitBase))
@@ -47,13 +58,22 @@ public static class HistoryImporter
     public static IReadOnlyList<ImportItem> FromDocument(SessionDocument document)
     {
         ArgumentNullException.ThrowIfNull(document);
-        return document.Entries
-            .Where(e => !string.IsNullOrWhiteSpace(e.Text))
-            .Select(e => new ImportItem(
-                e.Text,
-                string.Equals(e.Base, "hex", StringComparison.OrdinalIgnoreCase) ? NumberBase.Hexadecimal : NumberBase.Decimal,
-                e.Timestamp == default ? null : e.Timestamp))
-            .ToList();
+
+        var items = new List<ImportItem>();
+        foreach (var e in document.Entries)
+        {
+            DateTimeOffset? at = e.Timestamp == default ? null : e.Timestamp;
+            if (e.IsSeparator)
+            {
+                items.Add(ImportItem.Separator(at));
+            }
+            else if (!string.IsNullOrWhiteSpace(e.Text))
+            {
+                var b = string.Equals(e.Base, "hex", StringComparison.OrdinalIgnoreCase) ? NumberBase.Hexadecimal : NumberBase.Decimal;
+                items.Add(new ImportItem(e.Text, b, at));
+            }
+        }
+        return items;
     }
 
     /// <summary>Avalia cada item em ordem dentro da sessão. Variáveis já existentes continuam valendo.</summary>
@@ -66,6 +86,14 @@ public static class HistoryImporter
         var failed = 0;
         foreach (var item in items)
         {
+            if (item.IsSeparator)
+            {
+                if (item.Timestamp is { } sepAt) session.AddSeparator(sepAt);
+                else session.AddSeparator();
+                imported++;
+                continue;
+            }
+
             var entry = item.Timestamp is { } at
                 ? session.Evaluate(item.Text, item.Base, at)
                 : session.Evaluate(item.Text, item.Base);
@@ -74,6 +102,8 @@ public static class HistoryImporter
         }
         return new ImportResult(imported, failed);
     }
+
+    private static bool IsSeparatorLine(string line) => line.Length >= 3 && line.All(c => c == '-');
 
     private static bool TryStripBasePrefix(ref string line, out NumberBase numberBase)
     {

@@ -18,6 +18,8 @@
         <KeyBinding Modifiers="Ctrl+Shift" Key="S" Command="{Binding SaveSessionAsCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="E" Command="{Binding ExportHistoryCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="I" Command="{Binding ImportHistoryCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding DeleteLastLineCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="T" Command="{Binding InsertSeparatorCommand}" />
         <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{Binding ClearDisplayCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="V" Command="{Binding ShowVariablesCommand}" />
@@ -36,6 +38,12 @@
                 <MenuItem Header="_Exportar histórico..." Command="{Binding ExportHistoryCommand}" InputGestureText="Ctrl+E" />
                 <Separator />
                 <MenuItem Header="Sai_r" Command="{Binding ExitCommand}" InputGestureText="Alt+F4" />
+            </MenuItem>
+            <MenuItem Header="_Editar">
+                <MenuItem Header="_Apagar última linha" Command="{Binding DeleteLastLineCommand}" InputGestureText="Ctrl+D"
+                          ToolTip="Remove a última linha do histórico (cálculo ou separador) e recalcula as variáveis" />
+                <MenuItem Header="Inserir linha _separadora" Command="{Binding InsertSeparatorCommand}" InputGestureText="Ctrl+T"
+                          ToolTip="Acrescenta uma linha tracejada ao fim do histórico, nos dois painéis" />
             </MenuItem>
             <MenuItem Header="_Exibir">
                 <MenuItem Header="Painel _Hexadecimal" IsCheckable="True" IsChecked="{Binding HexPane.IsVisible, Mode=TwoWay}" InputGestureText="Ctrl+1" />

@@ -37,22 +37,49 @@
                     <ItemsControl ItemsSource="{Binding Lines}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:DisplayLine}">
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource DisplayExpressionStyle}"
-                                               views:SegmentedText.Segments="{Binding Segments}" />
-                                    <TextBlock Text="{Binding Result}" Style="{StaticResource DisplayResultStyle}">
-                                        <TextBlock.Resources>
-                                            <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayResultStyle}">
+                                <Grid>
+                                    <!-- Linha de cálculo: expressão + resultado -->
+                                    <StackPanel>
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsError}" Value="True">
-                                                        <Setter Property="Foreground" Value="{StaticResource DisplayErrorBrush}" />
-                                                        <Setter Property="FontSize" Value="16" />
+                                                    <DataTrigger Binding="{Binding IsSeparator}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </TextBlock.Resources>
-                                    </TextBlock>
-                                </StackPanel>
+                                        </StackPanel.Style>
+                                        <TextBlock Style="{StaticResource DisplayExpressionStyle}"
+                                                   views:SegmentedText.Segments="{Binding Segments}" />
+                                        <TextBlock Text="{Binding Result}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayResultStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsError}" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource DisplayErrorBrush}" />
+                                                            <Setter Property="FontSize" Value="16" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+
+                                    <!-- Linha separadora tracejada -->
+                                    <Rectangle Height="2" Margin="0,8,0,14" StrokeThickness="2" StrokeDashArray="4 3"
+                                               Stroke="{StaticResource DisplayDimBrush}" HorizontalAlignment="Stretch">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSeparator}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

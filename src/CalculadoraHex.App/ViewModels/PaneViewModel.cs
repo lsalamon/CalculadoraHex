@@ -49,4 +49,12 @@ public sealed partial class PaneViewModel : ObservableObject
     internal void Append(CalculationEntry entry) => Lines.Add(DisplayLine.From(entry, Base));
 
     internal void ClearLines() => Lines.Clear();
+
+    /// <summary>Redesenha o display inteiro a partir do histórico (após apagar a última linha, por exemplo).</summary>
+    internal void Rebuild(IEnumerable<CalculationEntry> entries)
+    {
+        Lines.Clear();
+        foreach (var entry in entries)
+            Lines.Add(DisplayLine.From(entry, Base));
+    }
 }

@@ -5,12 +5,15 @@ using CalculadoraHex.Core.Formatting;
 namespace CalculadoraHex.App.ViewModels;
 
 /// <summary>Uma linha do display, já renderizada na base do painel.</summary>
-public sealed record DisplayLine(Guid EntryId, IReadOnlyList<TextSegment> Segments, string Result, bool IsError)
+public sealed record DisplayLine(Guid EntryId, IReadOnlyList<TextSegment> Segments, string Result, bool IsError, bool IsSeparator = false)
 {
     public string Expression => string.Concat(Segments.Select(s => s.Text));
 
     public static DisplayLine From(CalculationEntry entry, NumberBase paneBase)
     {
+        if (entry.IsSeparator)
+            return new DisplayLine(entry.Id, Array.Empty<TextSegment>(), string.Empty, IsError: false, IsSeparator: true);
+
         if (entry.Succeeded && entry.Statement is not null)
         {
             var segments = ExpressionPrinter.PrintSegments(entry.Statement, paneBase);

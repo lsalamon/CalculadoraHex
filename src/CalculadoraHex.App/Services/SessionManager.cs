@@ -29,6 +29,7 @@ public sealed class SessionManager
 
         _session.EntryAdded += (_, _) => ScheduleSave();
         _session.Reset += (_, _) => ScheduleSave();
+        _session.HistoryReplaced += (_, _) => ScheduleSave();
         _session.Variables.Changed += (_, _) => ScheduleSave();
     }
 

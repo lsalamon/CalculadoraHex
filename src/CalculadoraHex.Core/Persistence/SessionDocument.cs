@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace CalculadoraHex.Core.Persistence;
 
 /// <summary>Forma gravada em JSON de uma sessão. Os valores são strings para não depender de BigInteger no serializador.</summary>
@@ -19,7 +21,13 @@ public sealed class SessionDocument
 
 public sealed class EntryDocument
 {
+    public const string SeparatorKind = "sep";
+
     public DateTimeOffset Timestamp { get; set; }
+
+    /// <summary>"sep" para linha separadora; ausente ou nulo para cálculo.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Kind { get; set; }
 
     /// <summary>"hex" ou "dec".</summary>
     public string Base { get; set; } = "dec";
@@ -30,4 +38,7 @@ public sealed class EntryDocument
     public string? Value { get; set; }
 
     public string? Error { get; set; }
+
+    [JsonIgnore]
+    public bool IsSeparator => string.Equals(Kind, SeparatorKind, StringComparison.OrdinalIgnoreCase);
 }

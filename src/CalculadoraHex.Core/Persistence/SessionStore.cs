@@ -17,6 +17,9 @@ public sealed class SessionStore
 {
     public const string FileExtension = ".json";
 
+    /// <summary>Como um separador aparece no texto exportado (e é reconhecido ao importar).</summary>
+    public static readonly string SeparatorLine = new('-', 40);
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -68,7 +71,12 @@ public sealed class SessionStore
         session.Clear(document.CreatedAt == default ? DateTimeOffset.Now : document.CreatedAt);
 
         foreach (var entry in document.Entries)
-            session.Evaluate(entry.Text, ParseBase(entry.Base), entry.Timestamp);
+        {
+            if (entry.IsSeparator)
+                session.AddSeparator(entry.Timestamp);
+            else
+                session.Evaluate(entry.Text, ParseBase(entry.Base), entry.Timestamp);
+        }
 
         var variables = new Dictionary<string, BigInteger>(StringComparer.OrdinalIgnoreCase);
         foreach (var kv in document.Variables)
@@ -147,6 +155,13 @@ public sealed class SessionStore
 
         foreach (var entry in session.Entries)
         {
+            if (entry.IsSeparator)
+            {
+                sb.AppendLine(SeparatorLine);
+                sb.AppendLine();
+                continue;
+            }
+
             if (entry.Succeeded && entry.Statement is not null)
             {
                 sb.AppendLine($"{ExpressionPrinter.Print(entry.Statement, NumberBase.Hexadecimal),-40}  {ExpressionPrinter.Print(entry.Statement, NumberBase.Decimal),-40}");
@@ -193,6 +208,7 @@ public sealed class SessionStore
             doc.Entries.Add(new EntryDocument
             {
                 Timestamp = e.Timestamp,
+                Kind = e.IsSeparator ? EntryDocument.SeparatorKind : null,
                 Base = e.InputBase == NumberBase.Hexadecimal ? "hex" : "dec",
                 Text = e.RawText,
                 Value = e.Value?.ToString(CultureInfo.InvariantCulture),

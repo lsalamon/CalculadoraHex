@@ -4,6 +4,15 @@ using CalculadoraHex.Core.Parsing;
 
 namespace CalculadoraHex.Core.Evaluation;
 
+public enum EntryKind
+{
+    /// <summary>Linha digitada e avaliada.</summary>
+    Calculation,
+
+    /// <summary>Linha tracejada inserida pelo usuário para separar blocos do histórico.</summary>
+    Separator,
+}
+
 /// <summary>
 /// Uma linha do histórico. É única e independente da base: cada painel a renderiza na sua própria base.
 /// </summary>
@@ -13,10 +22,12 @@ public sealed class CalculationEntry
 
     public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.Now;
 
+    public EntryKind Kind { get; init; } = EntryKind.Calculation;
+
     /// <summary>Base em que o usuário digitou a linha.</summary>
     public NumberBase InputBase { get; init; }
 
-    /// <summary>Texto exatamente como digitado.</summary>
+    /// <summary>Texto exatamente como digitado (vazio em separadores).</summary>
     public required string RawText { get; init; }
 
     public string? AssignedVariable { get; init; }
@@ -30,5 +41,15 @@ public sealed class CalculationEntry
     public Statement? Statement { get; init; }
 
     [JsonIgnore]
-    public bool Succeeded => Error is null && Value.HasValue;
+    public bool IsSeparator => Kind == EntryKind.Separator;
+
+    [JsonIgnore]
+    public bool Succeeded => Kind == EntryKind.Calculation && Error is null && Value.HasValue;
+
+    public static CalculationEntry CreateSeparator(DateTimeOffset timestamp) => new()
+    {
+        Kind = EntryKind.Separator,
+        Timestamp = timestamp,
+        RawText = string.Empty,
+    };
 }
