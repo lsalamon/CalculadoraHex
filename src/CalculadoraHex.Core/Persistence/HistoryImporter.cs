@@ -30,12 +30,14 @@ public sealed record ImportResult(int Imported, int Failed);
 /// </summary>
 public static class HistoryImporter
 {
-    private static readonly string[] CommentPrefixes = { "#", ";", "//" };
+    /// <summary>Linhas iniciadas por estes prefixos são anotações do arquivo e não entram no histórico.</summary>
+    private static readonly string[] IgnoredPrefixes = { ";", "//" };
 
     /// <summary>
     /// Lê um script de texto. Cada linha não vazia é uma expressão. Prefixos <c>[hex]</c>, <c>[dec]</c>,
     /// <c>hex:</c> ou <c>dec:</c> fixam a base da linha; sem prefixo vale <paramref name="defaultBase"/>.
-    /// Linhas iniciadas por <c>#</c>, <c>;</c> ou <c>//</c> são comentários. Uma linha só de traços
+    /// Linhas iniciadas por <c>#</c> viram comentários no histórico (como ao digitar na calculadora);
+    /// as iniciadas por <c>;</c> ou <c>//</c> são ignoradas. Uma linha só de traços
     /// (<c>---</c>, três ou mais) vira separador.
     /// </summary>
     public static IReadOnlyList<ImportItem> ParseScript(string content, NumberBase defaultBase)
@@ -47,7 +49,14 @@ public static class HistoryImporter
         {
             var line = rawLine.Trim();
             if (line.Length == 0) continue;
-            if (CommentPrefixes.Any(p => line.StartsWith(p, StringComparison.Ordinal))) continue;
+            if (IgnoredPrefixes.Any(p => line.StartsWith(p, StringComparison.Ordinal))) continue;
+
+            // '#' vai como está: a sessão o reconhece como comentário ao avaliar a linha.
+            if (line.StartsWith('#'))
+            {
+                items.Add(new ImportItem(line, defaultBase));
+                continue;
+            }
 
             if (IsSeparatorLine(line))
             {
@@ -122,7 +131,7 @@ public static class HistoryImporter
                 ? session.Evaluate(item.Text, item.Base, at)
                 : session.Evaluate(item.Text, item.Base);
             imported++;
-            if (!entry.Succeeded) failed++;
+            if (!entry.IsStatic && !entry.Succeeded) failed++;
         }
         return new ImportResult(imported, failed);
     }

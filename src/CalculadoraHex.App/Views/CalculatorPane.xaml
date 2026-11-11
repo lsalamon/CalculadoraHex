@@ -38,12 +38,30 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:DisplayLine}">
                                 <Grid>
+                                    <!-- Comentário: texto literal começando por '#' -->
+                                    <TextBlock Text="{Binding CommentText}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayTextStyle}">
+                                                <Setter Property="FontSize" Value="16" />
+                                                <Setter Property="FontStyle" Value="Italic" />
+                                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                                <Setter Property="Margin" Value="0,2,0,10" />
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsComment}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+
                                     <!-- Linha de cálculo: expressão + resultado -->
                                     <StackPanel>
                                         <StackPanel.Style>
                                             <Style TargetType="StackPanel">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSeparator}" Value="True">
+                                                    <DataTrigger Binding="{Binding IsCalculation}" Value="False">
                                                         <Setter Property="Visibility" Value="Collapsed" />
                                                     </DataTrigger>
                                                 </Style.Triggers>

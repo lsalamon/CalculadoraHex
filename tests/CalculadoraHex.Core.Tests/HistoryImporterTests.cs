@@ -25,6 +25,7 @@ public class HistoryImporterTests
         var items = HistoryImporter.ParseScript(script, NumberBase.Hexadecimal);
 
         Assert.Collection(items,
+            i => Assert.Equal("# comentário", i.Text), // '#' agora vira comentário no histórico
             i => { Assert.Equal("a = 1234", i.Text); Assert.Equal(NumberBase.Hexadecimal, i.Base); },
             i => { Assert.Equal("b = 10", i.Text); Assert.Equal(NumberBase.Decimal, i.Base); },
             i => { Assert.Equal("c = FF", i.Text); Assert.Equal(NumberBase.Hexadecimal, i.Base); },

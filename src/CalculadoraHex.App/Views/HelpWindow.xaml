@@ -65,11 +65,20 @@
                 <TextBlock Style="{StaticResource H}" Text="Sessões" />
                 <TextBlock Style="{StaticResource P}" Text="Tudo é gravado automaticamente em %LOCALAPPDATA%\CalculadoraHex\sessoes. Ao abrir, a última sessão volta com histórico e variáveis. Use Arquivo para iniciar outra, abrir uma antiga, salvar com outro nome ou exportar o histórico em texto." />
 
+                <TextBlock Style="{StaticResource H}" Text="Comentários" />
+                <TextBlock Style="{StaticResource P}" Text="Se a linha digitada começa por #, ela não é calculada: o texto é inserido literalmente, com o #, nos dois painéis. O comentário é gravado na sessão, sai na exportação e pode ser apagado com Ctrl+D como qualquer outra linha. Um # no meio da expressão continua sendo erro." />
+                <Border Style="{StaticResource DisplayBorderStyle}" Padding="10,6">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Code}" Text="#soma de valores" />
+                        <TextBlock Style="{StaticResource Code}" Text="a = 1234 + 4321" />
+                    </StackPanel>
+                </Border>
+
                 <TextBlock Style="{StaticResource H}" Text="Editar o histórico" />
                 <TextBlock Style="{StaticResource P}" Text="Editar > Apagar última linha (Ctrl+D) remove a última linha, seja cálculo ou separador, e recalcula as variáveis reavaliando o que sobrou: uma atribuição apagada deixa de valer. Editar > Inserir linha separadora (Ctrl+T) acrescenta uma linha tracejada nos dois painéis, útil para marcar blocos; ela também é gravada e exportada." />
 
                 <TextBlock Style="{StaticResource H}" Text="Importar histórico" />
-                <TextBlock Style="{StaticResource P}" Text="Arquivo > Importar histórico acrescenta operações à sessão atual, sem apagar nada. Aceita uma sessão gravada (.json) ou um script de texto com uma expressão por linha. No script, prefixos [hex], [dec], hex: ou dec: fixam a base da linha; sem prefixo vale a base escolhida no diálogo. Linhas iniciadas por #, ; ou // são comentários; uma linha só de traços (---) vira separador." />
+                <TextBlock Style="{StaticResource P}" Text="Arquivo > Importar histórico acrescenta operações à sessão atual, sem apagar nada. Aceita uma sessão gravada (.json) ou um script de texto com uma expressão por linha. No script, prefixos [hex], [dec], hex: ou dec: fixam a base da linha; sem prefixo vale a base escolhida no diálogo. Linhas iniciadas por # viram comentários no histórico; as iniciadas por ; ou // são ignoradas; uma linha só de traços (---) vira separador." />
                 <Border Style="{StaticResource DisplayBorderStyle}" Padding="10,6">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Code}" Text="# script.txt" />

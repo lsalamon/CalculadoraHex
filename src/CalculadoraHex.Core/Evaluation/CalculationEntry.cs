@@ -14,6 +14,9 @@ public enum EntryKind
 
     /// <summary>Linha "nome = valor" gerada por Variáveis > Imprimir no display; guarda o valor daquele momento.</summary>
     VariablePrint,
+
+    /// <summary>Texto livre que começa por '#': inserido literalmente, sem avaliação.</summary>
+    Comment,
 }
 
 /// <summary>
@@ -49,7 +52,10 @@ public sealed class CalculationEntry
     [JsonIgnore]
     public bool IsVariablePrint => Kind == EntryKind.VariablePrint;
 
-    /// <summary>Linhas que não são reavaliadas ao reconstruir o histórico (separadores e impressões).</summary>
+    [JsonIgnore]
+    public bool IsComment => Kind == EntryKind.Comment;
+
+    /// <summary>Linhas que não são reavaliadas ao reconstruir o histórico (separadores, impressões e comentários).</summary>
     [JsonIgnore]
     public bool IsStatic => Kind != EntryKind.Calculation;
 
@@ -61,6 +67,14 @@ public sealed class CalculationEntry
         Kind = EntryKind.Separator,
         Timestamp = timestamp,
         RawText = string.Empty,
+    };
+
+    public static CalculationEntry CreateComment(string text, NumberBase inputBase, DateTimeOffset timestamp) => new()
+    {
+        Kind = EntryKind.Comment,
+        Timestamp = timestamp,
+        InputBase = inputBase,
+        RawText = text,
     };
 
     public static CalculationEntry CreateVariablePrint(string name, BigInteger value, DateTimeOffset timestamp) => new()

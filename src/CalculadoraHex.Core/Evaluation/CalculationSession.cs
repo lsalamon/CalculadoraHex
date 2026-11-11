@@ -37,9 +37,26 @@ public sealed class CalculationSession
     public CalculationEntry Evaluate(string text, NumberBase inputBase) =>
         Evaluate(text, inputBase, DateTimeOffset.Now);
 
+    /// <summary>
+    /// Avalia uma linha digitada. Texto que começa por '#' não é avaliado: vira um comentário literal.
+    /// </summary>
     public CalculationEntry Evaluate(string text, NumberBase inputBase, DateTimeOffset timestamp)
     {
+        ArgumentNullException.ThrowIfNull(text);
+
+        var trimmed = text.Trim();
+        if (trimmed.StartsWith('#'))
+            return AddComment(trimmed, inputBase, timestamp);
+
         var entry = _evaluator.Evaluate(text, inputBase, timestamp);
+        Add(entry);
+        return entry;
+    }
+
+    public CalculationEntry AddComment(string text, NumberBase inputBase = NumberBase.Decimal, DateTimeOffset? timestamp = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(text);
+        var entry = CalculationEntry.CreateComment(text.Trim(), inputBase, timestamp ?? DateTimeOffset.Now);
         Add(entry);
         return entry;
     }

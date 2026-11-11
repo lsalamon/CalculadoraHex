@@ -79,6 +79,11 @@ public sealed class SessionStore
                 if (TryParseValue(entry.Value, out var printed) && !string.IsNullOrWhiteSpace(entry.Text))
                     session.AddVariablePrint(entry.Text, printed, entry.Timestamp);
             }
+            else if (entry.IsComment)
+            {
+                if (!string.IsNullOrWhiteSpace(entry.Text))
+                    session.AddComment(entry.Text, ParseBase(entry.Base), entry.Timestamp);
+            }
             else
                 session.Evaluate(entry.Text, ParseBase(entry.Base), entry.Timestamp);
         }
@@ -170,6 +175,12 @@ public sealed class SessionStore
                 continue;
             }
 
+            if (entry.IsComment)
+            {
+                sb.AppendLine(entry.RawText);
+                continue;
+            }
+
             if (entry.IsVariablePrint)
             {
                 sb.AppendLine($"{ResultText(entry, NumberBase.Hexadecimal),40}  {ResultText(entry, NumberBase.Decimal),40}");
@@ -226,6 +237,7 @@ public sealed class SessionStore
                 {
                     EntryKind.Separator => EntryDocument.SeparatorKind,
                     EntryKind.VariablePrint => EntryDocument.VariablePrintKind,
+                    EntryKind.Comment => EntryDocument.CommentKind,
                     _ => null,
                 },
                 Base = e.InputBase == NumberBase.Hexadecimal ? "hex" : "dec",

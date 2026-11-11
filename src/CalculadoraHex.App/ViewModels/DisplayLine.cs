@@ -5,9 +5,21 @@ using CalculadoraHex.Core.Formatting;
 namespace CalculadoraHex.App.ViewModels;
 
 /// <summary>Uma linha do display, já renderizada na base do painel.</summary>
-public sealed record DisplayLine(Guid EntryId, IReadOnlyList<TextSegment> Segments, string Result, bool IsError, bool IsSeparator = false)
+public sealed record DisplayLine(
+    Guid EntryId,
+    IReadOnlyList<TextSegment> Segments,
+    string Result,
+    bool IsError,
+    bool IsSeparator = false,
+    bool IsComment = false)
 {
     public string Expression => string.Concat(Segments.Select(s => s.Text));
+
+    /// <summary>Verdadeiro nas linhas de cálculo e impressão de variável; falso em separadores e comentários.</summary>
+    public bool IsCalculation => !IsSeparator && !IsComment;
+
+    /// <summary>Texto literal de um comentário (o '#' inicial é mantido).</summary>
+    public string CommentText => IsComment ? Result : string.Empty;
 
     /// <summary>Falso em linhas só de resultado (impressão de variável): o display não reserva a linha da expressão.</summary>
     public bool HasExpression => Segments.Count > 0;
@@ -16,6 +28,9 @@ public sealed record DisplayLine(Guid EntryId, IReadOnlyList<TextSegment> Segmen
     {
         if (entry.IsSeparator)
             return new DisplayLine(entry.Id, Array.Empty<TextSegment>(), string.Empty, IsError: false, IsSeparator: true);
+
+        if (entry.IsComment)
+            return new DisplayLine(entry.Id, Array.Empty<TextSegment>(), entry.RawText, IsError: false, IsComment: true);
 
         if (entry.IsVariablePrint && entry.Value is { } printed)
         {

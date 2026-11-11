@@ -22,8 +22,8 @@ public sealed partial class PaneViewModel : ObservableObject
     public string Title => Base == NumberBase.Hexadecimal ? "HEXADECIMAL" : "DECIMAL";
 
     public string Hint => Base == NumberBase.Hexadecimal
-        ? "Dígitos 0-9 A-F. Ex.: a=1234   a=a*4321   0xFF+1"
-        : "Dígitos 0-9. Ex.: a=4660   a=a*17185   (2+3)*4";
+        ? "Dígitos 0-9 A-F. Ex.: a=1234   a=a*4321   0xFF+1   #comentário"
+        : "Dígitos 0-9. Ex.: a=4660   a=a*17185   (2+3)*4   #comentário";
 
     public ObservableCollection<DisplayLine> Lines { get; } = new();
 
