@@ -66,10 +66,12 @@
                                     </StackPanel>
 
                                     <!-- Linha separadora tracejada -->
-                                    <Rectangle Height="2" Margin="0,8,0,14" StrokeThickness="2" StrokeDashArray="4 3"
-                                               Stroke="{StaticResource DisplayDimBrush}" HorizontalAlignment="Stretch">
-                                        <Rectangle.Style>
-                                            <Style TargetType="Rectangle">
+                                    <!-- Line (um único traço) em vez de Rectangle: as bordas de um retângulo fino sobrepõem os vãos. -->
+                                    <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Height="2" Margin="0,8,0,14"
+                                          StrokeThickness="2" StrokeDashArray="4 3" StrokeDashCap="Flat"
+                                          Stroke="{StaticResource DisplayDimBrush}" HorizontalAlignment="Stretch">
+                                        <Line.Style>
+                                            <Style TargetType="Line">
                                                 <Setter Property="Visibility" Value="Collapsed" />
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsSeparator}" Value="True">
@@ -77,8 +79,8 @@
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </Rectangle.Style>
-                                    </Rectangle>
+                                        </Line.Style>
+                                    </Line>
                                 </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
