@@ -20,23 +20,22 @@ Digite uma expressão na linha `>` de qualquer painel e pressione Enter. Os díg
 - Ctrl+1 e Ctrl+2 ocultam ou exibem cada painel; ao voltar, o histórico completo está lá.
 - Comentários: uma linha que começa por `#` não é calculada. O texto entra literalmente, com o `#`, nos dois painéis (ex.: `#soma de valores`). É gravado na sessão, exportado e pode ser apagado como qualquer linha.
 - Menu **Editar**: Ctrl+D apaga a última linha do histórico e recalcula as variáveis; Ctrl+T insere uma linha tracejada separadora nos dois painéis (também gravada e exportada).
-- Menu **Especiais > Raiz inteira de uma variável** (Ctrl+R): acha o menor inteiro `x` que, multiplicado por si próprio `n` vezes, não passa do valor de uma variável escolhida. `n` é a quantidade de fatores, sempre em decimal (`n = 3` é `x·x·x`). Sem variável definida, pede que uma seja atribuída. Resolvida a conta, os valores são **digitados sozinhos na linha de entrada do painel ativo, um por vez**, como se você fizesse a entrada dos dados, e cada um mostra o seu resultado antes do próximo. O bloco abre com uma linha tracejada de separação (não repetida se a última linha do histórico já for uma). Depois vêm um comentário com a variável e o `n` e, para cada valor, um comentário que o explica seguido da atribuição a uma **variável nova** derivada do nome escolhido: `a_raiz`, `a_pot` e `a_dif` (x, x^n e a diferença) e, se a conta não fecha, `a_prox`, `a_proxpot` e `a_exc` (o inteiro seguinte, sua potência e quanto ela passa). Se algum nome já existir, o conjunto inteiro ganha um número no fim (`a_raiz2`...) e nada é sobrescrito. Cada linha é uma entrada comum do histórico, apagável com Ctrl+D uma por vez. Para `a = 1234` e `n = 3`:
+- Funções: `sqrt(x)` (raiz quadrada inteira), `root(x, n)` (raiz n-ésima inteira, n de 1 a 10000) e `pow(x, n)` (potência). Tudo em inteiros, sem ponto flutuante; a raiz é arredondada para baixo. Os argumentos seguem a base do painel, como qualquer número.
+- Menu **Especiais > Raiz inteira de uma variável** (Ctrl+R): acha o menor inteiro `x` que, multiplicado por si próprio `n` vezes, não passa do valor de uma variável escolhida. `n` é a quantidade de fatores, sempre em decimal (`n = 3` é `x·x·x`). Sem variável definida, pede que uma seja atribuída. Resolvida a conta, as linhas são **digitadas sozinhas na linha de entrada do painel ativo, uma por vez**, como se você fizesse a entrada dos dados, e cada uma mostra o seu resultado antes da próxima. O bloco abre com uma linha tracejada (não repetida se a última linha do histórico já for uma) e cria três **variáveis novas**, derivadas do nome escolhido: `v1_raiz` (a raiz), `v1_result` (a raiz multiplicada por si própria `n` vezes) e `v1_dif` (o que sobra de `v1`; zero se a conta é exata). Se algum dos três nomes já existir, o conjunto ganha um número no fim (`v1_raiz2`, `v1_result2`, `v1_dif2`) e nada é sobrescrito. Cada linha é uma entrada comum do histórico, apagável com Ctrl+D uma por vez. Com `n = 2`, para `v1 = 288261332929378871`:
 
   ```text
-  #raiz 3 de a
-  #a_raiz: x, o inteiro cuja potência de 3 fatores chega mais perto de a sem passar
-  a_raiz = 10
-  #a_pot: x^3, o produto de 3 fatores iguais a x
-  a_pot = 1000
-  #a_dif: a - x^3, o que sobra de a depois de tirar x^3 (zero se a conta é exata)
-  a_dif = 234
-  #a_prox: x + 1, o primeiro inteiro cuja potência passa de a
-  a_prox = 11
-  #a_proxpot: (x + 1)^3, a potência do inteiro seguinte
-  a_proxpot = 1331
-  #a_exc: (x + 1)^3 - a, quanto a potência do seguinte passa de a
-  a_exc = 97
+  ----------------------------------------------
+  #calcula raiz
+  v1_raiz = sqrt(v1)
+                                       536899741
+  #calcula o resultado
+  v1_result = v1_raiz * v1_raiz
+                          288261331885867081
+  #calcula a diferença
+  v1_dif = v1 - v1_result
+                                  1043511790
   ```
+  Com `n` diferente de 2 a raiz é `v1_raiz = root(v1, n)`. Os valores que já estão em variáveis aparecem pelo nome, não pelo número. O resultado é escrito como `v1_raiz * v1_raiz * v1_raiz` até 6 fatores; acima disso, como `pow(v1_raiz, n)`.
 - Menu **Variáveis**: Ctrl+P imprime todas as variáveis no display, uma por linha e em ordem alfabética, entre linhas separadoras (sem repetir a anterior se já houver uma). Essas linhas guardam o valor daquele momento e são gravadas na sessão.
 - F1 abre a referência de sintaxe e atalhos.
 

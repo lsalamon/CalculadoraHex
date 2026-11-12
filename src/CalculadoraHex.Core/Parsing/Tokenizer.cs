@@ -51,6 +51,7 @@ public static class Tokenizer
                 '/' => TokenKind.Slash,
                 '(' => TokenKind.LeftParen,
                 ')' => TokenKind.RightParen,
+                ',' => TokenKind.Comma,
                 '=' => TokenKind.Equals,
                 _ => throw new CalculationException($"Caractere inválido '{c}'.", i),
             };

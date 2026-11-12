@@ -9,8 +9,9 @@ namespace CalculadoraHex.Core.Parsing;
 /// linha := [ident '='] expr
 /// expr  := termo (('+'|'-') termo)*
 /// termo := fator (('*'|'/') fator)*
-/// fator := numero | ident | '(' expr ')' | '-' fator
+/// fator := numero | ident | '(' expr ')' | '-' fator | funcao '(' expr (',' expr)* ')'
 /// </code>
+/// Funções: <c>sqrt(x)</c>, <c>root(x, n)</c> (raízes inteiras) e <c>pow(x, n)</c> (potência).
 /// Os dígitos são interpretados na base informada. No painel hexa, uma palavra composta só de
 /// dígitos hexa que começa por letra (ex.: <c>a</c>, <c>cafe</c>) é lida como variável se uma
 /// variável com esse nome estiver definida; caso contrário, como número.
@@ -107,6 +108,9 @@ public sealed class Parser
                 return inner;
             }
 
+            case TokenKind.Word when !token.ForcedVariable && _tokens[_index + 1].Kind == TokenKind.LeftParen:
+                return ParseFunctionCall();
+
             case TokenKind.Word:
                 Advance();
                 return ClassifyWord(token);
@@ -118,6 +122,41 @@ public sealed class Parser
                 throw new CalculationException($"Símbolo inesperado '{token.Text}'.", token.Position);
         }
     }
+
+    /// <summary>nome '(' expr (',' expr)* ')'. O nome e a quantidade de argumentos são conferidos aqui.</summary>
+    private Expression ParseFunctionCall()
+    {
+        var nameToken = Advance();
+        var name = nameToken.Text.ToLowerInvariant();
+        if (!Functions.TryGetValue(name, out var arity))
+            throw new CalculationException($"Função '{nameToken.Text}' desconhecida. Use sqrt(x), root(x, n) ou pow(x, n).", nameToken.Position);
+
+        Advance(); // '('
+        var arguments = new List<Expression> { ParseExpression() };
+        while (Current.Kind == TokenKind.Comma)
+        {
+            Advance();
+            arguments.Add(ParseExpression());
+        }
+
+        if (Current.Kind != TokenKind.RightParen)
+            throw new CalculationException("Esperado ')'.", Current.Position);
+        Advance();
+
+        if (arguments.Count != arity)
+            throw new CalculationException(
+                $"{name} espera {arity} argumento{(arity == 1 ? string.Empty : "s")}, mas recebeu {arguments.Count}.", nameToken.Position);
+
+        return new FunctionCall(name, arguments);
+    }
+
+    /// <summary>Funções conhecidas e a quantidade de argumentos de cada uma.</summary>
+    private static readonly Dictionary<string, int> Functions = new()
+    {
+        ["sqrt"] = 1,
+        ["root"] = 2,
+        ["pow"] = 2,
+    };
 
     private Expression ClassifyWord(Token token)
     {

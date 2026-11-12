@@ -56,6 +56,17 @@ public static class ExpressionPrinter
                 segments.Add(new TextSegment(v.Name, SegmentKind.Variable, v.Ambiguous));
                 break;
 
+            case FunctionCall f:
+                segments.Add(new TextSegment(f.Name, SegmentKind.Operator));
+                segments.Add(new TextSegment("(", SegmentKind.Punctuation));
+                for (var i = 0; i < f.Arguments.Count; i++)
+                {
+                    if (i > 0) segments.Add(new TextSegment(", ", SegmentKind.Punctuation));
+                    Print(f.Arguments[i], numberBase, segments, parentPrecedence: 0);
+                }
+                segments.Add(new TextSegment(")", SegmentKind.Punctuation));
+                break;
+
             case NegateExpression neg:
                 segments.Add(new TextSegment("-", SegmentKind.Operator));
                 Print(neg.Operand, numberBase, segments, parentPrecedence: 3);

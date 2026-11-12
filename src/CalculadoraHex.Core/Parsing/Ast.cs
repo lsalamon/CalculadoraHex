@@ -28,6 +28,9 @@ public sealed record BinaryExpression(BinaryOperator Operator, Expression Left, 
 
 public sealed record NegateExpression(Expression Operand) : Expression;
 
+/// <summary>Chamada de função: <c>sqrt(x)</c>, <c>root(x, n)</c>, <c>pow(x, n)</c>.</summary>
+public sealed record FunctionCall(string Name, IReadOnlyList<Expression> Arguments) : Expression;
+
 /// <summary>Uma linha completa: expressão opcionalmente atribuída a uma variável.</summary>
 public sealed record Statement(string? AssignedVariable, Expression Expression)
 {

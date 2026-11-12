@@ -66,16 +66,19 @@
                 <TextBlock Style="{StaticResource P}" Text="Tudo é gravado automaticamente em %LOCALAPPDATA%\CalculadoraHex\sessoes. Ao abrir, a última sessão volta com histórico e variáveis. Use Arquivo para iniciar outra, abrir uma antiga, salvar com outro nome ou exportar o histórico em texto." />
 
                 <TextBlock Style="{StaticResource H}" Text="Funções especiais" />
-                <TextBlock Style="{StaticResource P}" Text="Especiais > Raiz inteira de uma variável (Ctrl+R) acha o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor de uma variável. Escolha a variável na lista e informe n, a quantidade de fatores, sempre em decimal: n = 2 é x · x e n = 3 é x · x · x. Resolvida a conta, os valores são digitados sozinhos na linha de entrada do painel ativo, um por vez, como se você fizesse a entrada dos dados, e cada um mostra o seu resultado antes do próximo. O bloco abre com uma linha tracejada de separação, que não se repete se a última linha do histórico já for uma. Depois vêm um comentário com a variável e o n e, para cada valor, um comentário que o explica seguido da atribuição a uma variável nova derivada do nome escolhido: a_raiz, a_pot e a_dif (x, x^n e a diferença) e, se a conta não fechar, também a_prox, a_proxpot e a_exc (o inteiro seguinte, sua potência e quanto ela passa). Se algum desses nomes já existir, o conjunto inteiro ganha um número no fim, como a_raiz2, e nada é sobrescrito. Cada linha é uma entrada comum do histórico: Ctrl+D apaga uma por vez. Enquanto a digitação roda, a linha de entrada fica travada; Ctrl+N a interrompe. Sem nenhuma variável definida, a função pede que você atribua uma antes. Só vale para valores maiores ou iguais a zero, e n vai de 1 a 10000." />
+                <TextBlock Style="{StaticResource P}" Text="Funções da entrada: sqrt(x) é a raiz quadrada inteira, root(x, n) a raiz n-ésima inteira (n de 1 a 10000) e pow(x, n) a potência. Tudo em inteiros, e a raiz é arredondada para baixo. Os argumentos seguem a base do painel. Especiais > Raiz inteira de uma variável (Ctrl+R) acha o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor de uma variável. Escolha a variável na lista e informe n, a quantidade de fatores, sempre em decimal: n = 2 é x · x e n = 3 é x · x · x. Resolvida a conta, as linhas são digitadas sozinhas na linha de entrada do painel ativo, uma por vez, como se você fizesse a entrada dos dados, e cada uma mostra o seu resultado antes da próxima. O bloco abre com uma linha tracejada, que não se repete se a última linha do histórico já for uma, e cria três variáveis novas derivadas do nome escolhido: v1_raiz (a raiz), v1_result (a raiz multiplicada por si própria n vezes) e v1_dif (o que sobra de v1; zero se a conta é exata). Se algum dos três nomes já existir, o conjunto ganha um número no fim, como v1_raiz2, e nada é sobrescrito. Os valores que já estão em variáveis aparecem pelo nome, não pelo número. Cada linha é uma entrada comum do histórico: Ctrl+D apaga uma por vez. Enquanto a digitação roda, a linha de entrada fica travada; Ctrl+N a interrompe. Sem nenhuma variável definida, a função pede que você atribua uma antes. Só vale para valores maiores ou iguais a zero." />
                 <Border Style="{StaticResource DisplayBorderStyle}" Padding="10,6">
                     <StackPanel>
-                        <TextBlock Style="{StaticResource Code}" Text="a = 1234" />
-                        <TextBlock Style="{StaticResource Code}" Text="#raiz 3 de a" />
-                        <TextBlock Style="{StaticResource Code}" Text="#a_raiz: x, o inteiro cuja potência de 3 fatores chega mais perto de a sem passar" />
-                        <TextBlock Style="{StaticResource Code}" Text="a_raiz = 10" />
-                        <TextBlock Style="{StaticResource Code}" Text="#a_pot: x^3, o produto de 3 fatores iguais a x" />
-                        <TextBlock Style="{StaticResource Code}" Text="a_pot = 1000" />
-                        <TextBlock Style="{StaticResource Code}" Text="..." />
+                        <TextBlock Style="{StaticResource Code}" Text="v1 = 288261332929378871" />
+                        <TextBlock Style="{StaticResource Code}" Text="#calcula raiz" />
+                        <TextBlock Style="{StaticResource Code}" Text="v1_raiz = sqrt(v1)" />
+                        <TextBlock Style="{StaticResource Code}" HorizontalAlignment="Right" Text="536899741" />
+                        <TextBlock Style="{StaticResource Code}" Text="#calcula o resultado" />
+                        <TextBlock Style="{StaticResource Code}" Text="v1_result = v1_raiz * v1_raiz" />
+                        <TextBlock Style="{StaticResource Code}" HorizontalAlignment="Right" Text="288261331885867081" />
+                        <TextBlock Style="{StaticResource Code}" Text="#calcula a diferença" />
+                        <TextBlock Style="{StaticResource Code}" Text="v1_dif = v1 - v1_result" />
+                        <TextBlock Style="{StaticResource Code}" HorizontalAlignment="Right" Text="1043511790" />
                     </StackPanel>
                 </Border>
 

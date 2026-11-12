@@ -18,7 +18,7 @@ public class IntegerRootTests
     }
 
     [Fact]
-    public void Conta_inexata_informa_a_diferenca_e_o_inteiro_seguinte()
+    public void Conta_inexata_informa_a_diferenca()
     {
         var r = IntegerRoot.Compute(1234, 3);
 
@@ -26,9 +26,6 @@ public class IntegerRootTests
         Assert.Equal(new BigInteger(1000), r.Power);
         Assert.Equal(new BigInteger(234), r.Difference);
         Assert.False(r.IsExact);
-        Assert.Equal(new BigInteger(11), r.NextRoot);
-        Assert.Equal(new BigInteger(1331), r.NextPower);
-        Assert.Equal(new BigInteger(97), r.NextExcess);
     }
 
     [Theory]

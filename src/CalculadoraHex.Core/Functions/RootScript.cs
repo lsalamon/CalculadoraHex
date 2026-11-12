@@ -4,23 +4,44 @@ namespace CalculadoraHex.Core.Functions;
 
 /// <summary>
 /// As linhas que o resultado de uma raiz inteira "digita" na calculadora, como se o usuário fizesse a entrada dos dados:
-/// um comentário dizendo de qual variável e de qual n se trata e, para cada valor, um comentário que o explica seguido
-/// da atribuição. Os comentários são literais e valem igual nos dois painéis; cada atribuição é escrita na base do
-/// painel em que será digitada, então avaliá-la ali dá exatamente o valor pretendido.
+/// <code>
+/// #calcula raiz
+/// v1_raiz = sqrt(v1)               (ou root(v1, n) quando n não é 2)
+/// #calcula o resultado
+/// v1_result = v1_raiz * v1_raiz    (n fatores; acima de 6 fatores, pow(v1_raiz, n))
+/// #calcula a diferença
+/// v1_dif = v1 - v1_result
+/// </code>
+/// Todo valor que já é guardado numa variável aparece pelo nome dela, não pelo número. O único número escrito é o
+/// n de root e pow, na base do painel em que as linhas serão digitadas. Os comentários são literais e valem igual
+/// nos dois painéis.
 /// </summary>
 public static class RootScript
 {
+    /// <summary>Até esta quantidade de fatores a multiplicação é escrita por extenso; acima, usa-se pow.</summary>
+    public const int MaxWrittenFactors = 6;
+
     public static IReadOnlyList<string> Build(string source, IntegerRootResult result, int suffix, NumberBase typedBase)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         ArgumentNullException.ThrowIfNull(result);
 
-        var lines = new List<string> { $"#raiz {result.N} de {source}" };
-        foreach (var variable in RootVariables.Build(source, result, suffix))
+        var names = RootVariables.Names(source, suffix);
+        var exponent = NumberFormatter.FormatForEntry(result.N, typedBase);
+
+        var rootCall = result.N == 2 ? $"sqrt({source})" : $"root({source}, {exponent})";
+        var product = result.N <= MaxWrittenFactors
+            ? string.Join(" * ", Enumerable.Repeat(names.Root, result.N))
+            : $"pow({names.Root}, {exponent})";
+
+        return new[]
         {
-            lines.Add($"#{variable.Name}: {variable.Explanation}");
-            lines.Add($"{variable.Name} = {NumberFormatter.FormatForEntry(variable.Value, typedBase)}");
-        }
-        return lines;
+            "#calcula raiz",
+            $"{names.Root} = {rootCall}",
+            "#calcula o resultado",
+            $"{names.Result} = {product}",
+            "#calcula a diferença",
+            $"{names.Difference} = {source} - {names.Result}",
+        };
     }
 }

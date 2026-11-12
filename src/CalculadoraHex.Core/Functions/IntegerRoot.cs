@@ -7,19 +7,13 @@ namespace CalculadoraHex.Core.Functions;
 /// <param name="Root">Maior inteiro x tal que x^n não passa de <paramref name="Value"/> (o menor dos dois inteiros que cercam a raiz).</param>
 /// <param name="Power">x^n para x = <paramref name="Root"/>.</param>
 /// <param name="Difference">Value menos Power; zero quando a conta é exata.</param>
-/// <param name="NextRoot">Inteiro seguinte, Root + 1.</param>
-/// <param name="NextPower">NextRoot^n, sempre maior que Value quando a conta não é exata.</param>
-/// <param name="NextExcess">NextPower menos Value: quanto o inteiro seguinte passa.</param>
 public sealed record IntegerRootResult(
     BigInteger Value,
     int N,
     BigInteger Root,
     BigInteger Power,
     BigInteger Difference,
-    bool IsExact,
-    BigInteger NextRoot,
-    BigInteger NextPower,
-    BigInteger NextExcess);
+    bool IsExact);
 
 /// <summary>
 /// Raiz n-ésima inteira: o menor inteiro que, multiplicado por si próprio n vezes (n fatores),
@@ -40,7 +34,16 @@ public static class IntegerRoot
 
         if (value.Sign < 0)
             throw new CalculationException(
-                $"Só é possível calcular a raiz de valores maiores ou iguais a zero. Esta variável vale {value}.");
+                $"Só é possível calcular a raiz de valores maiores ou iguais a zero. O valor é {value}.");
+    }
+
+    /// <summary>Só o inteiro x (o maior com x^n &lt;= value). É o que as funções sqrt e root usam.</summary>
+    public static BigInteger Floor(BigInteger value, BigInteger n)
+    {
+        if (n < MinExponent || n > MaxExponent)
+            throw new CalculationException($"O valor de n deve ser um inteiro entre {MinExponent} e {MaxExponent}.");
+
+        return Compute(value, (int)n).Root;
     }
 
     public static IntegerRootResult Compute(BigInteger value, int n)
@@ -49,8 +52,6 @@ public static class IntegerRoot
 
         var root = FloorRoot(value, n);
         var power = BigInteger.Pow(root, n);
-        var next = root + 1;
-        var nextPower = BigInteger.Pow(next, n);
 
         return new IntegerRootResult(
             Value: value,
@@ -58,10 +59,7 @@ public static class IntegerRoot
             Root: root,
             Power: power,
             Difference: value - power,
-            IsExact: power == value,
-            NextRoot: next,
-            NextPower: nextPower,
-            NextExcess: nextPower - value);
+            IsExact: power == value);
     }
 
     /// <summary>Maior x com x^n &lt;= value, por Newton em inteiros partindo de um limite superior.</summary>

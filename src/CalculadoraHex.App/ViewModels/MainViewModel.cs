@@ -323,9 +323,9 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         var pane = ChooseTypingPane();
-        var suffix = RootVariables.ChooseSuffix(request.VariableName, result, Session.Variables.IsDefined);
+        var suffix = RootVariables.ChooseSuffix(request.VariableName, Session.Variables.IsDefined);
         var lines = RootScript.Build(request.VariableName, result, suffix, pane.Base);
-        var created = RootVariables.Build(request.VariableName, result, suffix).Count;
+        var names = RootVariables.Names(request.VariableName, suffix);
 
         FocusInputRequested?.Invoke(this, EventArgs.Empty);
         if (!await TypeLinesAsync(pane, lines))
@@ -338,7 +338,7 @@ public sealed partial class MainViewModel : ObservableObject
         StatusMessage = (result.IsExact
             ? $"Raiz {result.N} de {request.VariableName}: exata, x = {root}."
             : $"Raiz {result.N} de {request.VariableName}: x = {root}, diferença {NumberFormatter.Format(result.Difference, NumberBase.Decimal)}.")
-            + $" {created} variáveis criadas.";
+            + $" Variáveis criadas: {names.Root}, {names.Result} e {names.Difference}.";
     }
 
     /// <summary>O painel ativo, se estiver visível; senão o que estiver à mostra. É nele que as linhas são digitadas.</summary>

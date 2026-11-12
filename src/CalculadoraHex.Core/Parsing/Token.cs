@@ -10,6 +10,7 @@ public enum TokenKind
     Slash,
     LeftParen,
     RightParen,
+    Comma,
     Equals,
     End,
 }

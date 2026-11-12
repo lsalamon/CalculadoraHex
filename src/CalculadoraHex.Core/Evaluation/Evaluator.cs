@@ -1,4 +1,5 @@
 using System.Numerics;
+using CalculadoraHex.Core.Functions;
 using CalculadoraHex.Core.Parsing;
 
 namespace CalculadoraHex.Core.Evaluation;
@@ -58,9 +59,39 @@ public sealed class Evaluator
             ? value
             : throw new CalculationException($"Variável '{v.Name}' não definida."),
         NegateExpression neg => -Evaluate(neg.Operand),
+        FunctionCall f => EvaluateFunction(f),
         BinaryExpression b => EvaluateBinary(b),
         _ => throw new InvalidOperationException($"Nó desconhecido: {expression.GetType().Name}"),
     };
+
+    /// <summary>Limite de bits do resultado de pow, para uma linha digitada por engano não travar a calculadora.</summary>
+    private const long MaxPowerBits = 4_000_000;
+
+    private BigInteger EvaluateFunction(FunctionCall f)
+    {
+        var args = f.Arguments.Select(Evaluate).ToArray();
+        switch (f.Name)
+        {
+            case "sqrt":
+                return IntegerRoot.Floor(args[0], 2);
+
+            case "root":
+                return IntegerRoot.Floor(args[0], args[1]);
+
+            case "pow":
+            {
+                var (x, n) = (args[0], args[1]);
+                if (n.Sign < 0 || n > IntegerRoot.MaxExponent)
+                    throw new CalculationException($"O expoente de pow deve ser um inteiro entre 0 e {IntegerRoot.MaxExponent}.");
+                if ((long)x.GetBitLength() * (long)n > MaxPowerBits)
+                    throw new CalculationException("Resultado grande demais para calcular.");
+                return BigInteger.Pow(x, (int)n);
+            }
+
+            default:
+                throw new InvalidOperationException($"Função desconhecida: {f.Name}");
+        }
+    }
 
     private BigInteger EvaluateBinary(BinaryExpression b)
     {
