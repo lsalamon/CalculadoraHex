@@ -83,21 +83,6 @@ public sealed class SessionStore
                 if (!string.IsNullOrWhiteSpace(entry.Text))
                     session.AddComment(entry.Text, ParseBase(entry.Base), entry.Timestamp);
             }
-            else if (entry.IsRoot)
-            {
-                // Só variável, valor e n são gravados; a raiz e a diferença são recalculadas.
-                if (TryParseValue(entry.Value, out var target) && entry.Exponent is { } n && !string.IsNullOrWhiteSpace(entry.Text))
-                {
-                    try
-                    {
-                        session.AddRootResult(entry.Text, target, n, entry.Timestamp, entry.Suffix ?? 1);
-                    }
-                    catch (CalculationException)
-                    {
-                        // Arquivo editado à mão com valor ou n inválidos: a linha é descartada.
-                    }
-                }
-            }
             else
                 session.Evaluate(entry.Text, ParseBase(entry.Base), entry.Timestamp);
         }
@@ -195,20 +180,6 @@ public sealed class SessionStore
             {
                 sb.AppendLine(entry.RawText);
             }
-            else if (entry.IsRootResult && entry.Root is { } root)
-            {
-                // O resultado em si é anotação (começa por ';'); as variáveis que ele criou saem como atribuições,
-                // para que a importação as recrie e as linhas seguintes que as usam continuem valendo.
-                var dec = RootFormatter.Format(entry.RawText, root, NumberBase.Decimal);
-                var hex = RootFormatter.Format(entry.RawText, root, NumberBase.Hexadecimal);
-                sb.AppendLine($"; {dec.Title} (hex {NumberFormatter.Format(root.Value, NumberBase.Hexadecimal)})");
-                sb.AppendLine($";   dec: {dec.Detail}");
-                if (dec.Note is not null) sb.AppendLine($";   dec: {dec.Note}");
-                sb.AppendLine($";   hex: {hex.Detail}");
-                if (hex.Note is not null) sb.AppendLine($";   hex: {hex.Note}");
-                foreach (var assignment in entry.RootAssignments)
-                    sb.AppendLine(Annotate($"[dec] {assignment.Name} = {NumberFormatter.Format(assignment.Value, NumberBase.Decimal)}", assignment.Label));
-            }
             else if (entry.IsVariablePrint)
             {
                 var value = entry.Value!.Value;
@@ -271,15 +242,12 @@ public sealed class SessionStore
                     EntryKind.Separator => EntryDocument.SeparatorKind,
                     EntryKind.VariablePrint => EntryDocument.VariablePrintKind,
                     EntryKind.Comment => EntryDocument.CommentKind,
-                    EntryKind.RootResult => EntryDocument.RootKind,
                     _ => null,
                 },
                 Base = e.InputBase == NumberBase.Hexadecimal ? "hex" : "dec",
                 Text = e.RawText,
                 Value = e.Value?.ToString(CultureInfo.InvariantCulture),
                 Error = e.Error,
-                Exponent = e.RootExponent,
-                Suffix = e.RootSuffix,
             });
         }
 

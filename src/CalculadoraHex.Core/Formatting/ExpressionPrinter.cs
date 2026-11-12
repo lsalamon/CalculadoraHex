@@ -83,18 +83,8 @@ public static class ExpressionPrinter
     /// Em hexa, um literal que começa por letra (ex.: <c>A0</c>) poderia ser confundido com um nome;
     /// nesse caso é impresso com prefixo <c>0x</c>.
     /// </summary>
-    private static string FormatLiteral(NumberLiteral literal, NumberBase numberBase)
-    {
-        var text = NumberFormatter.Format(literal.Value, numberBase);
-        if (numberBase == NumberBase.Hexadecimal)
-        {
-            var negative = text.StartsWith('-');
-            var digits = negative ? text[1..] : text;
-            if (digits.Length > 0 && char.IsLetter(digits[0]))
-                return (negative ? "-0x" : "0x") + digits;
-        }
-        return text;
-    }
+    private static string FormatLiteral(NumberLiteral literal, NumberBase numberBase) =>
+        NumberFormatter.FormatForEntry(literal.Value, numberBase);
 
     private static int Precedence(BinaryOperator op) => op switch
     {

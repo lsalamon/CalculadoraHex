@@ -1,6 +1,3 @@
-using System.Numerics;
-using CalculadoraHex.Core.Functions;
-
 namespace CalculadoraHex.Core.Evaluation;
 
 /// <summary>
@@ -64,36 +61,6 @@ public sealed class CalculationSession
         return entry;
     }
 
-    /// <summary>
-    /// Calcula a raiz inteira de n fatores do valor que a variável guarda agora e acrescenta o resultado ao histórico.
-    /// Lança <see cref="CalculationException"/> se a variável não existe ou se o valor ou n são inválidos.
-    /// </summary>
-    public CalculationEntry AddRootResult(string variableName, int n)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(variableName);
-        if (!Variables.TryGet(variableName, out var value))
-            throw new CalculationException($"Variável '{variableName}' não definida.");
-
-        return AddRootResult(variableName, value, n, DateTimeOffset.Now);
-    }
-
-    /// <param name="suffix">
-    /// Sufixo numérico dos nomes das variáveis criadas. Nulo escolhe o primeiro conjunto de nomes ainda livre,
-    /// de modo que as variáveis são sempre novas; um valor explícito é usado ao recarregar uma sessão gravada.
-    /// </param>
-    public CalculationEntry AddRootResult(string variableName, BigInteger value, int n, DateTimeOffset timestamp, int? suffix = null)
-    {
-        var result = IntegerRoot.Compute(value, n);
-        var chosen = suffix ?? RootVariables.ChooseSuffix(variableName, result, Variables.IsDefined);
-        var entry = CalculationEntry.CreateRootResult(variableName, result, timestamp, chosen);
-
-        foreach (var assignment in entry.RootAssignments)
-            Variables.Set(assignment.Name, assignment.Value);
-
-        Add(entry);
-        return entry;
-    }
-
     public CalculationEntry AddSeparator() => AddSeparator(DateTimeOffset.Now);
 
     public CalculationEntry AddSeparator(DateTimeOffset timestamp)
@@ -135,8 +102,8 @@ public sealed class CalculationSession
     }
 
     /// <summary>
-    /// Apaga a última linha (cálculo, separador ou impressão de variável). As variáveis são recalculadas reavaliando o que sobrou,
-    /// de modo que uma atribuição apagada deixa de valer. Retorna falso se não havia linha.
+    /// Apaga a última linha (cálculo, separador, comentário ou impressão de variável). As variáveis são recalculadas
+    /// reavaliando o que sobrou, de modo que uma atribuição apagada deixa de valer. Retorna falso se não havia linha.
     /// </summary>
     public bool RemoveLast()
     {
@@ -172,15 +139,6 @@ public sealed class CalculationSession
 
         foreach (var old in previous)
         {
-            if (old.IsRootResult)
-            {
-                // As variáveis criadas pela raiz voltam na mesma ordem em que foram atribuídas.
-                foreach (var assignment in old.RootAssignments)
-                    Variables.Set(assignment.Name, assignment.Value);
-                _entries.Add(old);
-                continue;
-            }
-
             _entries.Add(old.IsStatic
                 ? old
                 : _evaluator.Evaluate(old.RawText, old.InputBase, old.Timestamp));

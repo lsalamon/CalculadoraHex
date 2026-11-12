@@ -33,9 +33,18 @@ public sealed partial class PaneViewModel : ObservableObject
     [ObservableProperty]
     private bool _isVisible = true;
 
+    /// <summary>
+    /// Verdadeiro enquanto uma função está "digitando" na linha de entrada: o usuário não pode editar nem enviar
+    /// o que está sendo escrito, senão suas teclas se misturariam com as da função.
+    /// </summary>
+    [ObservableProperty]
+    private bool _isInputLocked;
+
     [RelayCommand]
     private void Submit()
     {
+        if (IsInputLocked) return;
+
         var text = InputText.Trim();
         if (text.Length == 0) return;
 
@@ -44,7 +53,10 @@ public sealed partial class PaneViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ClearInput() => InputText = string.Empty;
+    private void ClearInput()
+    {
+        if (!IsInputLocked) InputText = string.Empty;
+    }
 
     internal void Append(CalculationEntry entry) => Lines.Add(DisplayLine.From(entry, Base));
 

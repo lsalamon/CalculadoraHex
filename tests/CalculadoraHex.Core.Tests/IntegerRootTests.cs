@@ -1,6 +1,5 @@
 using System.Numerics;
 using CalculadoraHex.Core;
-using CalculadoraHex.Core.Formatting;
 using CalculadoraHex.Core.Functions;
 
 namespace CalculadoraHex.Core.Tests;
@@ -97,39 +96,5 @@ public class IntegerRootTests
     {
         var ex = Assert.Throws<CalculationException>(() => IntegerRoot.Compute(valor, n));
         Assert.Contains(trecho, ex.Message);
-    }
-
-    [Fact]
-    public void Texto_por_base_segue_o_exemplo_da_especificacao()
-    {
-        var r = IntegerRoot.Compute(1234, 3);
-
-        var dec = RootFormatter.Format("a", r, NumberBase.Decimal);
-        Assert.Equal("raiz 3 de a = 1234", dec.Title);
-        Assert.Equal("x = 10    x^3 = 1000    diferença 234", dec.Detail);
-        Assert.Equal("x = 11 daria 1331, que passa 97", dec.Note);
-
-        var hex = RootFormatter.Format("a", r, NumberBase.Hexadecimal);
-        Assert.Equal("raiz 3 de a = 4D2", hex.Title);
-        Assert.Equal("x = A    x^3 = 3E8    diferença EA", hex.Detail);
-        Assert.Equal("x = B daria 533, que passa 61", hex.Note);
-    }
-
-    [Fact]
-    public void Conta_exata_termina_em_exato_e_nao_tem_nota()
-    {
-        var text = RootFormatter.Format("a", IntegerRoot.Compute(1000, 3), NumberBase.Decimal);
-
-        Assert.Equal("x = 10    x^3 = 1000    exato", text.Detail);
-        Assert.Null(text.Note);
-    }
-
-    [Fact]
-    public void Expoente_e_sempre_decimal_mesmo_no_painel_hexa()
-    {
-        var text = RootFormatter.Format("v", IntegerRoot.Compute(BigInteger.Pow(2, 16), 16), NumberBase.Hexadecimal);
-
-        Assert.Contains("x^16", text.Detail);
-        Assert.StartsWith("raiz 16 de v", text.Title);
     }
 }

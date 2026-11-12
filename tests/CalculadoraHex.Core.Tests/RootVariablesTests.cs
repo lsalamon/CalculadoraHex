@@ -52,14 +52,4 @@ public class RootVariablesTests
 
         Assert.Equal(2, RootVariables.ChooseSuffix("a", r, definidas.Contains));
     }
-
-    [Fact]
-    public void Rotulos_descrevem_cada_valor()
-    {
-        var labels = RootVariables.Build("a", IntegerRoot.Compute(1234, 3), 1).Select(v => v.Label);
-
-        Assert.Equal(
-            new[] { "x", "x^3", "diferença", "x seguinte", "x seguinte^3", "quanto o seguinte passa" },
-            labels);
-    }
 }

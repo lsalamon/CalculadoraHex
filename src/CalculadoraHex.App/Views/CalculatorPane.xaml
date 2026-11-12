@@ -21,6 +21,8 @@
                              Style="{StaticResource DisplayInputStyle}"
                              Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"
                              ToolTip="{Binding Hint}"
+                             IsReadOnly="{Binding IsInputLocked}" IsReadOnlyCaretVisible="True"
+                             TextChanged="OnInputTextChanged"
                              GotKeyboardFocus="OnInputGotFocus">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter" Command="{Binding SubmitCommand}" />
@@ -86,46 +88,6 @@
                                                         <DataTrigger Binding="{Binding IsError}" Value="True">
                                                             <Setter Property="Foreground" Value="{StaticResource DisplayErrorBrush}" />
                                                             <Setter Property="FontSize" Value="16" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                    </StackPanel>
-
-                                    <!-- Resultado de Especiais > Raiz inteira: título, resultado e, se inexato, o inteiro seguinte -->
-                                    <StackPanel Margin="0,2,0,12">
-                                        <StackPanel.Style>
-                                            <Style TargetType="StackPanel">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsRootResult}" Value="True">
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </StackPanel.Style>
-                                        <TextBlock Text="{Binding Title}" Style="{StaticResource DisplayExpressionStyle}" />
-                                        <TextBlock Text="{Binding Detail}" Style="{StaticResource DisplayTextStyle}"
-                                                   FontSize="20" Margin="0,4,0,0" HorizontalAlignment="Left" />
-                                        <TextBlock Text="{Binding Note}" Margin="0,4,0,0">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayExpressionStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding HasNote}" Value="False">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Variables}" Margin="0,4,0,0" FontSize="13">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayExpressionStyle}">
-                                                    <Setter Property="Opacity" Value="0.8" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding HasVariables}" Value="False">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>

@@ -40,6 +40,13 @@ public partial class CalculatorPane : UserControl
 
     private void OnInputGotFocus(object sender, RoutedEventArgs e) => InputFocused?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>Enquanto uma função digita, o cursor acompanha o fim do texto, como numa digitação de verdade.</summary>
+    private void OnInputTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_viewModel?.IsInputLocked == true)
+            InputBox.CaretIndex = InputBox.Text.Length;
+    }
+
     private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (_viewModel is not null)

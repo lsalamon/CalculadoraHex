@@ -3,8 +3,7 @@ using System.Numerics;
 
 namespace CalculadoraHex.Core.Functions;
 
-/// <param name="Label">Descrição curta do valor, para anotações.</param>
-public sealed record RootVariable(string Name, BigInteger Value, string Label);
+public sealed record RootVariable(string Name, BigInteger Value);
 
 /// <summary>
 /// Variáveis novas criadas por um resultado de raiz inteira, com nomes derivados da variável de origem:
@@ -21,20 +20,19 @@ public static class RootVariables
         ArgumentNullException.ThrowIfNull(result);
 
         var tail = suffix <= 1 ? string.Empty : suffix.ToString(CultureInfo.InvariantCulture);
-        var n = result.N;
 
         var list = new List<RootVariable>
         {
-            new($"{source}_raiz{tail}", result.Root, "x"),
-            new($"{source}_pot{tail}", result.Power, $"x^{n}"),
-            new($"{source}_dif{tail}", result.Difference, "diferença"),
+            new($"{source}_raiz{tail}", result.Root),
+            new($"{source}_pot{tail}", result.Power),
+            new($"{source}_dif{tail}", result.Difference),
         };
 
         if (!result.IsExact)
         {
-            list.Add(new($"{source}_prox{tail}", result.NextRoot, "x seguinte"));
-            list.Add(new($"{source}_proxpot{tail}", result.NextPower, $"x seguinte^{n}"));
-            list.Add(new($"{source}_exc{tail}", result.NextExcess, "quanto o seguinte passa"));
+            list.Add(new($"{source}_prox{tail}", result.NextRoot));
+            list.Add(new($"{source}_proxpot{tail}", result.NextPower));
+            list.Add(new($"{source}_exc{tail}", result.NextExcess));
         }
 
         return list;

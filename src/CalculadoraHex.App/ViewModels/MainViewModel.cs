@@ -4,6 +4,7 @@ using CalculadoraHex.App.Services;
 using CalculadoraHex.Core;
 using CalculadoraHex.Core.Evaluation;
 using CalculadoraHex.Core.Formatting;
+using CalculadoraHex.Core.Functions;
 using CalculadoraHex.Core.Persistence;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -30,6 +31,8 @@ public sealed partial class MainViewModel : ObservableObject
         };
         Session.Reset += (_, _) =>
         {
+            // Nova sessão ou sessão aberta no meio de uma digitação automática: o que faltava digitar não vale mais.
+            _presentation?.Cancel();
             HexPane.ClearLines();
             DecimalPane.ClearLines();
         };
@@ -71,7 +74,14 @@ public sealed partial class MainViewModel : ObservableObject
             StatusMessage = "Última sessão reaberta.";
     }
 
-    public void Shutdown() => Sessions.FlushSave();
+    public void Shutdown()
+    {
+        _presentation?.Cancel();
+        Sessions.FlushSave();
+    }
+
+    /// <summary>Digitação automática em andamento (Especiais > Raiz inteira); nula quando não há.</summary>
+    private CancellationTokenSource? _presentation;
 
     [RelayCommand]
     private void NewSession()
@@ -230,9 +240,7 @@ public sealed partial class MainViewModel : ObservableObject
         Session.RemoveLast();
         StatusMessage = last.IsSeparator
             ? "Linha separadora apagada."
-            : last.IsRootResult
-                ? $"Raiz de {last.RawText} apagada, com as {last.RootAssignments.Count} variáveis que criou."
-                : $"Linha apagada: {last.RawText}";
+            : $"Linha apagada: {last.RawText}";
     }
 
     /// <summary>Insere uma linha tracejada separadora no fim do histórico.</summary>
@@ -271,12 +279,19 @@ public sealed partial class MainViewModel : ObservableObject
     /// <summary>Pede à janela que devolva o foco à linha de entrada (depois do aviso de falta de variável).</summary>
     public event EventHandler? FocusInputRequested;
 
+    // Ritmo da digitação automática: rápido o bastante para não cansar, lento o bastante para acompanhar.
+    private const int CharDelayMs = 18;
+    private const int BeforeEnterMs = 140;
+    private const int AfterResultMs = 220;
+
     /// <summary>
     /// Especiais > Raiz inteira: menor inteiro que, multiplicado por si próprio n vezes, não passa do valor
     /// de uma variável; informa a diferença quando a conta não fecha. Sem variável definida, pede que uma seja atribuída.
+    /// Resolvida a conta, os valores são digitados na linha de entrada do painel ativo, um por vez, como se o usuário
+    /// fizesse a entrada dos dados: cada linha é uma entrada comum e mostra o seu resultado antes da próxima.
     /// </summary>
     [RelayCommand]
-    private void RootOfVariable()
+    private async Task RootOfVariable()
     {
         if (Session.Variables.Count == 0)
         {
@@ -290,19 +305,88 @@ public sealed partial class MainViewModel : ObservableObject
         var request = AskRootRequest?.Invoke(Session.Variables.Snapshot());
         if (request is null) return;
 
+        IntegerRootResult result;
         try
         {
-            var entry = Session.AddRootResult(request.VariableName, request.Exponent);
-            var result = entry.Root!;
-            var created = entry.RootAssignments.Count;
-            StatusMessage = (result.IsExact
-                ? $"Raiz {result.N} de {request.VariableName}: exata, x = {NumberFormatter.Format(result.Root, NumberBase.Decimal)}."
-                : $"Raiz {result.N} de {request.VariableName}: x = {NumberFormatter.Format(result.Root, NumberBase.Decimal)}, diferença {NumberFormatter.Format(result.Difference, NumberBase.Decimal)}.")
-                + $" {created} variáveis criadas.";
+            if (!Session.Variables.TryGet(request.VariableName, out var value))
+                throw new CalculationException($"Variável '{request.VariableName}' não definida.");
+            result = IntegerRoot.Compute(value, request.Exponent);
         }
         catch (CalculationException ex)
         {
             MessageBox.Show(ex.Message, "Raiz inteira", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var pane = ChooseTypingPane();
+        var suffix = RootVariables.ChooseSuffix(request.VariableName, result, Session.Variables.IsDefined);
+        var lines = RootScript.Build(request.VariableName, result, suffix, pane.Base);
+        var created = RootVariables.Build(request.VariableName, result, suffix).Count;
+
+        FocusInputRequested?.Invoke(this, EventArgs.Empty);
+        if (!await TypeLinesAsync(pane, lines))
+        {
+            StatusMessage = "Raiz interrompida antes de terminar.";
+            return;
+        }
+
+        var root = NumberFormatter.Format(result.Root, NumberBase.Decimal);
+        StatusMessage = (result.IsExact
+            ? $"Raiz {result.N} de {request.VariableName}: exata, x = {root}."
+            : $"Raiz {result.N} de {request.VariableName}: x = {root}, diferença {NumberFormatter.Format(result.Difference, NumberBase.Decimal)}.")
+            + $" {created} variáveis criadas.";
+    }
+
+    /// <summary>O painel ativo, se estiver visível; senão o que estiver à mostra. É nele que as linhas são digitadas.</summary>
+    private PaneViewModel ChooseTypingPane()
+    {
+        var preferred = ActiveBase == NumberBase.Hexadecimal ? HexPane : DecimalPane;
+        if (preferred.IsVisible) return preferred;
+        return HexPane.IsVisible ? HexPane : DecimalPane;
+    }
+
+    /// <summary>
+    /// Digita cada linha na entrada do painel, caractere a caractere, e a envia como se o usuário tivesse apertado Enter.
+    /// Retorna falso se foi interrompida (nova sessão, sessão aberta ou janela fechada) antes de terminar.
+    /// </summary>
+    private async Task<bool> TypeLinesAsync(PaneViewModel pane, IReadOnlyList<string> lines)
+    {
+        using var cts = new CancellationTokenSource();
+        _presentation = cts;
+        HexPane.IsInputLocked = true;
+        DecimalPane.IsInputLocked = true;
+
+        try
+        {
+            foreach (var line in lines)
+            {
+                pane.InputText = string.Empty;
+                foreach (var ch in line)
+                {
+                    pane.InputText += ch;
+                    await Task.Delay(CharDelayMs, cts.Token);
+                }
+
+                await Task.Delay(BeforeEnterMs, cts.Token);
+                cts.Token.ThrowIfCancellationRequested(); // a sessão pode ter sido zerada durante a espera
+                Session.Evaluate(line, pane.Base);
+                pane.InputText = string.Empty;
+
+                await Task.Delay(AfterResultMs, cts.Token);
+            }
+
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            pane.InputText = string.Empty;
+            return false;
+        }
+        finally
+        {
+            _presentation = null;
+            HexPane.IsInputLocked = false;
+            DecimalPane.IsInputLocked = false;
         }
     }
 
