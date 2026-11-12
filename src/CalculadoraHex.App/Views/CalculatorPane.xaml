@@ -36,7 +36,8 @@
             <Border Style="{StaticResource DisplayBorderStyle}">
                 <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                               Focusable="False" KeyboardNavigation.TabNavigation="None">
-                    <ItemsControl ItemsSource="{Binding Lines}">
+                    <!-- Margem à direita: com a barra de rolagem visível, o fim da linha não encosta nela. -->
+                    <ItemsControl ItemsSource="{Binding Lines}" Margin="0,0,12,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:DisplayLine}">
                                 <Grid>

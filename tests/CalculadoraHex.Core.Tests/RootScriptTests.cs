@@ -28,11 +28,11 @@ public sealed class RootScriptTests : IDisposable
             new[]
             {
                 "#calcula raiz",
-                "v1_raiz = sqrt(v1)",
+                "v1_raiz1 = sqrt(v1)",
                 "#calcula o resultado",
-                "v1_result = v1_raiz * v1_raiz",
+                "v1_result1 = v1_raiz1 * v1_raiz1",
                 "#calcula a diferença",
-                "v1_dif = v1 - v1_result",
+                "v1_dif1 = v1 - v1_result1",
             },
             lines);
     }
@@ -42,9 +42,9 @@ public sealed class RootScriptTests : IDisposable
     {
         var lines = RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Decimal);
 
-        Assert.Equal("a_raiz = root(a, 3)", lines[1]);
-        Assert.Equal("a_result = a_raiz * a_raiz * a_raiz", lines[3]);
-        Assert.Equal("a_dif = a - a_result", lines[5]);
+        Assert.Equal("a_raiz1 = root(a, 3)", lines[1]);
+        Assert.Equal("a_result1 = a_raiz1 * a_raiz1 * a_raiz1", lines[3]);
+        Assert.Equal("a_dif1 = a - a_result1", lines[5]);
     }
 
     [Fact]
@@ -53,8 +53,8 @@ public sealed class RootScriptTests : IDisposable
         var seis = RootScript.Build("a", IntegerRoot.Compute(1000000, 6), 1, NumberBase.Decimal);
         var sete = RootScript.Build("a", IntegerRoot.Compute(10000000, 7), 1, NumberBase.Decimal);
 
-        Assert.Equal("a_result = a_raiz * a_raiz * a_raiz * a_raiz * a_raiz * a_raiz", seis[3]);
-        Assert.Equal("a_result = pow(a_raiz, 7)", sete[3]);
+        Assert.Equal("a_result1 = a_raiz1 * a_raiz1 * a_raiz1 * a_raiz1 * a_raiz1 * a_raiz1", seis[3]);
+        Assert.Equal("a_result1 = pow(a_raiz1, 7)", sete[3]);
     }
 
     [Fact]
@@ -62,8 +62,8 @@ public sealed class RootScriptTests : IDisposable
     {
         var lines = RootScript.Build("v", IntegerRoot.Compute(7, 1), 1, NumberBase.Decimal);
 
-        Assert.Equal("v_raiz = root(v, 1)", lines[1]);
-        Assert.Equal("v_result = v_raiz", lines[3]);
+        Assert.Equal("v_raiz1 = root(v, 1)", lines[1]);
+        Assert.Equal("v_result1 = v_raiz1", lines[3]);
     }
 
     [Fact]
@@ -71,7 +71,7 @@ public sealed class RootScriptTests : IDisposable
     {
         var lines = RootScript.Build("b", IntegerRoot.Compute(1000, 3), 1, NumberBase.Decimal);
 
-        Assert.Equal("b_dif = b - b_result", lines[5]);
+        Assert.Equal("b_dif1 = b - b_result1", lines[5]);
     }
 
     [Fact]
@@ -91,10 +91,10 @@ public sealed class RootScriptTests : IDisposable
         var dec = RootScript.Build("a", IntegerRoot.Compute(1234, 10), 1, NumberBase.Decimal);
         var hex = RootScript.Build("a", IntegerRoot.Compute(1234, 10), 1, NumberBase.Hexadecimal);
 
-        Assert.Equal("a_raiz = root(a, 10)", dec[1]);
-        Assert.Equal("a_raiz = root(a, 0xA)", hex[1]);
-        Assert.Equal("a_result = pow(a_raiz, 10)", dec[3]);
-        Assert.Equal("a_result = pow(a_raiz, 0xA)", hex[3]);
+        Assert.Equal("a_raiz1 = root(a, 10)", dec[1]);
+        Assert.Equal("a_raiz1 = root(a, 0xA)", hex[1]);
+        Assert.Equal("a_result1 = pow(a_raiz1, 10)", dec[3]);
+        Assert.Equal("a_result1 = pow(a_raiz1, 0xA)", hex[3]);
 
         var cubo = RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Hexadecimal);
         Assert.Equal(RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Decimal), cubo);
@@ -145,7 +145,7 @@ public sealed class RootScriptTests : IDisposable
         Assert.True(session.Entries[1].IsComment);
         Assert.Equal("#calcula raiz", session.Entries[1].RawText);
         Assert.Equal(new BigInteger(536899741), session.Entries[2].Value);
-        Assert.Equal("v1_raiz", session.Entries[2].AssignedVariable);
+        Assert.Equal("v1_raiz1", session.Entries[2].AssignedVariable);
         Assert.Equal(new BigInteger(1043511790), session.Entries[6].Value);
 
         var store = new SessionStore(_dir);
@@ -154,23 +154,23 @@ public sealed class RootScriptTests : IDisposable
         var loaded = new CalculationSession();
         store.LoadInto(loaded, path);
         Assert.Equal(7, loaded.Entries.Count);
-        Assert.True(loaded.Variables.TryGet("v1_dif", out var dif));
+        Assert.True(loaded.Variables.TryGet("v1_dif1", out var dif));
         Assert.Equal(new BigInteger(1043511790), dif);
 
         var text = SessionStore.ExportText(session);
-        Assert.Contains("v1_raiz = sqrt(v1)", text);
+        Assert.Contains("v1_raiz1 = sqrt(v1)", text);
         var imported = new CalculationSession();
         var import = HistoryImporter.ImportInto(imported, HistoryImporter.ParseScript(text, NumberBase.Decimal));
         Assert.Equal(0, import.Failed);
         Assert.Equal(7, imported.Entries.Count);
-        Assert.True(imported.Variables.TryGet("v1_raiz", out var raiz));
+        Assert.True(imported.Variables.TryGet("v1_raiz1", out var raiz));
         Assert.Equal(new BigInteger(536899741), raiz);
-        Assert.True(imported.Variables.TryGet("v1_result", out var product));
+        Assert.True(imported.Variables.TryGet("v1_result1", out var product));
         Assert.Equal(BigInteger.Parse("288261331885867081"), product);
 
         // Ctrl+D apaga uma linha por vez, e a variável some com a sua linha
         session.RemoveLast();
-        Assert.False(session.Variables.IsDefined("v1_dif"));
-        Assert.True(session.Variables.IsDefined("v1_result"));
+        Assert.False(session.Variables.IsDefined("v1_dif1"));
+        Assert.True(session.Variables.IsDefined("v1_result1"));
     }
 }

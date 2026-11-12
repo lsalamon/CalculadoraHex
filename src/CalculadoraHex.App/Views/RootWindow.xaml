@@ -29,7 +29,7 @@
 
     <StackPanel Margin="14">
         <TextBlock Style="{StaticResource StatusTextStyle}" FontSize="13" TextWrapping="Wrap"
-                   Text="Encontra o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor da variável. Se a conta não fechar, informa a diferença. As linhas são digitadas na linha de entrada do painel ativo, uma por vez, e criam três variáveis novas: nome_raiz, nome_result e nome_dif." />
+                   Text="Encontra o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor da variável. Se a conta não fechar, informa a diferença. As linhas são digitadas na linha de entrada do painel ativo, uma por vez, e criam três variáveis novas: nome_raiz1, nome_result1 e nome_dif1 (o número muda a cada cálculo)." />
 
         <TextBlock Style="{StaticResource StatusTextStyle}" FontSize="13" FontWeight="SemiBold" Margin="0,14,0,6"
                    Text="Variável cujo valor será perseguido" />
