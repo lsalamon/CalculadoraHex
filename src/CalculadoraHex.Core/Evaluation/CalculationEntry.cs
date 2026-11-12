@@ -68,6 +68,14 @@ public sealed class CalculationEntry
     [JsonIgnore]
     public IntegerRootResult? Root { get; init; }
 
+    /// <summary>Sufixo numérico dos nomes das variáveis criadas pela raiz (1 = sem sufixo).</summary>
+    public int? RootSuffix { get; init; }
+
+    /// <summary>Variáveis que este resultado de raiz criou, com seus valores.</summary>
+    [JsonIgnore]
+    public IReadOnlyList<RootVariable> RootAssignments =>
+        Root is null ? Array.Empty<RootVariable>() : RootVariables.Build(RawText, Root, RootSuffix ?? 1);
+
     /// <summary>Linhas que não são reavaliadas ao reconstruir o histórico (separadores, impressões e comentários).</summary>
     [JsonIgnore]
     public bool IsStatic => Kind != EntryKind.Calculation;
@@ -90,7 +98,7 @@ public sealed class CalculationEntry
         RawText = text,
     };
 
-    public static CalculationEntry CreateRootResult(string variableName, IntegerRootResult result, DateTimeOffset timestamp) => new()
+    public static CalculationEntry CreateRootResult(string variableName, IntegerRootResult result, DateTimeOffset timestamp, int suffix = 1) => new()
     {
         Kind = EntryKind.RootResult,
         Timestamp = timestamp,
@@ -99,6 +107,7 @@ public sealed class CalculationEntry
         Value = result.Value,
         RootExponent = result.N,
         Root = result,
+        RootSuffix = suffix,
     };
 
     public static CalculationEntry CreateVariablePrint(string name, BigInteger value, DateTimeOffset timestamp) => new()

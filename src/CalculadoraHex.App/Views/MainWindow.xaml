@@ -86,14 +86,28 @@
 
         <!-- Barra de status: variáveis nas duas bases + sessão -->
         <StatusBar DockPanel.Dock="Bottom" Background="{StaticResource BezelDarkBrush}" KeyboardNavigation.TabNavigation="None">
-            <StatusBarItem>
-                <TextBlock Text="{Binding VariablesSummary}" Style="{StaticResource StatusTextStyle}" />
+            <!-- Três colunas: o resumo de variáveis ocupa o que sobrar e corta com reticências; mensagem e sessão ficam sempre inteiras -->
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock Text="{Binding VariablesSummary}" ToolTip="{Binding VariablesSummary}"
+                           Style="{StaticResource StatusTextStyle}" TextTrimming="CharacterEllipsis" />
             </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource StatusTextStyle}" Margin="0,0,16,0" Opacity="0.8" />
-                    <TextBlock Text="{Binding SessionName}" Style="{StaticResource StatusTextStyle}" />
-                </StackPanel>
+            <StatusBarItem Grid.Column="1" Margin="12,0,0,0">
+                <TextBlock Text="{Binding StatusMessage}" ToolTip="{Binding StatusMessage}" MaxWidth="360"
+                           Style="{StaticResource StatusTextStyle}" TextTrimming="CharacterEllipsis" Opacity="0.8" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="2" Margin="12,0,0,0">
+                <TextBlock Text="{Binding SessionName}" Style="{StaticResource StatusTextStyle}" />
             </StatusBarItem>
         </StatusBar>
 

@@ -1,5 +1,6 @@
 using System.Numerics;
 using CalculadoraHex.Core.Evaluation;
+using CalculadoraHex.Core.Functions;
 
 namespace CalculadoraHex.Core.Persistence;
 
@@ -110,7 +111,24 @@ public static class HistoryImporter
             }
             else if (e.IsRoot)
             {
-                // Resultado derivado de uma variável: não é recriado na importação.
+                // O resultado em si deriva de uma variável e não é recriado, mas as variáveis que ele criou
+                // viram atribuições, para que as linhas seguintes que as usam continuem valendo.
+                if (SessionStore.TryParseValue(e.Value, out var target) && e.Exponent is { } n && !string.IsNullOrWhiteSpace(e.Text))
+                {
+                    try
+                    {
+                        var result = IntegerRoot.Compute(target, n);
+                        foreach (var v in RootVariables.Build(e.Text, result, e.Suffix ?? 1))
+                            items.Add(new ImportItem(
+                                $"{v.Name} = {v.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}",
+                                NumberBase.Decimal,
+                                at));
+                    }
+                    catch (CalculationException)
+                    {
+                        // Arquivo editado à mão com valor ou n inválidos: a linha é descartada.
+                    }
+                }
             }
             else if (e.IsVariablePrint)
             {

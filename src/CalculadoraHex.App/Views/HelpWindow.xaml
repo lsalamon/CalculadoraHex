@@ -66,13 +66,14 @@
                 <TextBlock Style="{StaticResource P}" Text="Tudo é gravado automaticamente em %LOCALAPPDATA%\CalculadoraHex\sessoes. Ao abrir, a última sessão volta com histórico e variáveis. Use Arquivo para iniciar outra, abrir uma antiga, salvar com outro nome ou exportar o histórico em texto." />
 
                 <TextBlock Style="{StaticResource H}" Text="Funções especiais" />
-                <TextBlock Style="{StaticResource P}" Text="Especiais > Raiz inteira de uma variável (Ctrl+R) acha o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor de uma variável. Escolha a variável na lista e informe n, a quantidade de fatores, sempre em decimal: n = 2 é x · x e n = 3 é x · x · x. O resultado entra no histórico, em cada painel na sua base. Se a conta não fechar, a diferença é informada, junto com o inteiro seguinte e quanto ele passa. Sem nenhuma variável definida, a função pede que você atribua uma antes. Só vale para valores maiores ou iguais a zero, e n vai de 1 a 10000." />
+                <TextBlock Style="{StaticResource P}" Text="Especiais > Raiz inteira de uma variável (Ctrl+R) acha o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor de uma variável. Escolha a variável na lista e informe n, a quantidade de fatores, sempre em decimal: n = 2 é x · x e n = 3 é x · x · x. O resultado entra no histórico, em cada painel na sua base, e todos os valores que ele mostra são gravados em variáveis novas, com nomes derivados da variável escolhida: a_raiz, a_pot e a_dif (x, x^n e a diferença) e, se a conta não fechar, também a_prox, a_proxpot e a_exc (o inteiro seguinte, sua potência e quanto ela passa). Se algum desses nomes já existir, o conjunto inteiro ganha um número no fim, como a_raiz2, e nada é sobrescrito. Apagar a linha do resultado com Ctrl+D remove as variáveis que ela criou. Se a conta não fechar, a diferença é informada, junto com o inteiro seguinte e quanto ele passa. Sem nenhuma variável definida, a função pede que você atribua uma antes. Só vale para valores maiores ou iguais a zero, e n vai de 1 a 10000." />
                 <Border Style="{StaticResource DisplayBorderStyle}" Padding="10,6">
                     <StackPanel>
                         <TextBlock Style="{StaticResource Code}" Text="a = 1234" />
                         <TextBlock Style="{StaticResource Code}" Text="raiz 3 de a = 1234" />
                         <TextBlock Style="{StaticResource Code}" Text="x = 10    x^3 = 1000    diferença 234" />
                         <TextBlock Style="{StaticResource Code}" Text="x = 11 daria 1331, que passa 97" />
+                        <TextBlock Style="{StaticResource Code}" Text="variáveis criadas: a_raiz, a_pot, a_dif, a_prox, a_proxpot, a_exc" />
                     </StackPanel>
                 </Border>
 

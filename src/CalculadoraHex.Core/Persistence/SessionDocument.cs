@@ -49,6 +49,10 @@ public sealed class EntryDocument
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? Exponent { get; set; }
 
+    /// <summary>Sufixo dos nomes das variáveis criadas por uma linha "root"; ausente equivale a 1 (sem sufixo).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Suffix { get; set; }
+
     [JsonIgnore]
     public bool IsSeparator => string.Equals(Kind, SeparatorKind, StringComparison.OrdinalIgnoreCase);
 

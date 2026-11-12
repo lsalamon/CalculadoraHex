@@ -122,7 +122,7 @@ public sealed class RootEntryTests : IDisposable
     }
 
     [Fact]
-    public void Exportacao_traz_a_anotacao_nas_duas_bases_e_nao_e_recriada_ao_importar()
+    public void Exportacao_traz_a_anotacao_nas_duas_bases_e_recria_so_as_variaveis_ao_importar()
     {
         var s = SessionWith1234();
         s.AddRootResult("a", 3);
@@ -135,17 +135,26 @@ public sealed class RootEntryTests : IDisposable
         Assert.Contains(";   hex: x = A    x^3 = 3E8    diferença EA", text);
         Assert.Contains(";   hex: x = B daria 533, que passa 61", text);
 
+        Assert.Contains("[dec] a_raiz = 10", text);
+        Assert.Contains("[dec] a_exc = 97", text);
+
         var items = HistoryImporter.ParseScript(text, NumberBase.Decimal);
-        Assert.DoesNotContain(items, i => i.Text.Contains("raiz"));
+        Assert.DoesNotContain(items, i => i.Text.StartsWith("raiz "));
 
         var imported = new CalculationSession();
         var result = HistoryImporter.ImportInto(imported, items);
+
         Assert.Equal(0, result.Failed);
-        Assert.Single(imported.Entries); // só a atribuição a=4D2
+        Assert.Equal(7, imported.Entries.Count); // a=4D2 e as seis atribuições; o resultado em si não é recriado
+        Assert.All(imported.Entries, e => Assert.False(e.IsRootResult));
+        Assert.True(imported.Variables.TryGet("a_raiz", out var raiz));
+        Assert.Equal(new BigInteger(10), raiz);
+        Assert.True(imported.Variables.TryGet("a_dif", out var dif));
+        Assert.Equal(new BigInteger(234), dif);
     }
 
     [Fact]
-    public void Importar_sessao_json_nao_recria_o_resultado_da_raiz()
+    public void Importar_sessao_json_recria_as_variaveis_da_raiz_como_atribuicoes()
     {
         var store = new SessionStore(_dir);
         var original = SessionWith1234();
@@ -156,7 +165,142 @@ public sealed class RootEntryTests : IDisposable
         var target = new CalculationSession();
         var result = HistoryImporter.ImportInto(target, HistoryImporter.FromDocument(store.Read(path)));
 
-        Assert.Equal(1, result.Imported);
-        Assert.False(target.Entries[0].IsRootResult);
+        Assert.Equal(7, result.Imported); // a=4D2 e as seis atribuições
+        Assert.Equal(0, result.Failed);
+        Assert.All(target.Entries, e => Assert.False(e.IsRootResult));
+        Assert.True(target.Variables.TryGet("a_proxpot", out var proxima));
+        Assert.Equal(new BigInteger(1331), proxima);
+    }
+
+    [Fact]
+    public void Todos_os_valores_do_resultado_viram_variaveis_novas()
+    {
+        var s = SessionWith1234();
+
+        var entry = s.AddRootResult("a", 3);
+
+        Assert.Equal(1, entry.RootSuffix);
+        Assert.Equal(
+            new[] { "a_raiz", "a_pot", "a_dif", "a_prox", "a_proxpot", "a_exc" },
+            entry.RootAssignments.Select(v => v.Name));
+        Assert.Equal(new BigInteger(10), Valor(s, "a_raiz"));
+        Assert.Equal(new BigInteger(1000), Valor(s, "a_pot"));
+        Assert.Equal(new BigInteger(234), Valor(s, "a_dif"));
+        Assert.Equal(new BigInteger(11), Valor(s, "a_prox"));
+        Assert.Equal(new BigInteger(1331), Valor(s, "a_proxpot"));
+        Assert.Equal(new BigInteger(97), Valor(s, "a_exc"));
+        Assert.Equal(new BigInteger(1234), Valor(s, "a")); // a variável de origem não muda
+    }
+
+    [Fact]
+    public void Conta_exata_cria_so_raiz_potencia_e_diferenca()
+    {
+        var s = new CalculationSession();
+        s.Evaluate("b = 1000", NumberBase.Decimal);
+
+        s.AddRootResult("b", 3);
+
+        Assert.Equal(new BigInteger(10), Valor(s, "b_raiz"));
+        Assert.Equal(new BigInteger(1000), Valor(s, "b_pot"));
+        Assert.Equal(BigInteger.Zero, Valor(s, "b_dif"));
+        Assert.False(s.Variables.IsDefined("b_prox"));
+        Assert.False(s.Variables.IsDefined("b_exc"));
+    }
+
+    [Fact]
+    public void Rodar_de_novo_cria_um_conjunto_novo_sem_sobrescrever_o_anterior()
+    {
+        var s = SessionWith1234();
+        s.AddRootResult("a", 3);
+
+        var segunda = s.AddRootResult("a", 2);
+        var terceira = s.AddRootResult("a", 4);
+
+        Assert.Equal(2, segunda.RootSuffix);
+        Assert.Equal(3, terceira.RootSuffix);
+        Assert.Equal(new BigInteger(10), Valor(s, "a_raiz"));   // n = 3, intacto
+        Assert.Equal(new BigInteger(35), Valor(s, "a_raiz2"));  // n = 2
+        Assert.Equal(new BigInteger(9), Valor(s, "a_dif2"));
+        Assert.Equal(new BigInteger(5), Valor(s, "a_raiz3"));   // n = 4
+    }
+
+    [Fact]
+    public void Nome_ja_usado_pelo_usuario_empurra_o_conjunto_para_o_proximo_sufixo()
+    {
+        var s = SessionWith1234();
+        s.Evaluate("a_pot = 7", NumberBase.Decimal);
+
+        var entry = s.AddRootResult("a", 3);
+
+        Assert.Equal(2, entry.RootSuffix);
+        Assert.Equal(new BigInteger(7), Valor(s, "a_pot"));      // o do usuário permanece
+        Assert.Equal(new BigInteger(1000), Valor(s, "a_pot2"));
+    }
+
+    [Fact]
+    public void Apagar_a_linha_do_resultado_remove_as_variaveis_que_ela_criou()
+    {
+        var s = SessionWith1234();
+        s.AddRootResult("a", 3);
+
+        s.RemoveLast();
+
+        Assert.Single(s.Entries);
+        Assert.False(s.Variables.IsDefined("a_raiz"));
+        Assert.False(s.Variables.IsDefined("a_exc"));
+        Assert.True(s.Variables.IsDefined("a"));
+    }
+
+    [Fact]
+    public void Apagar_uma_linha_posterior_mantem_as_variaveis_do_resultado()
+    {
+        var s = SessionWith1234();
+        s.AddRootResult("a", 3);
+        s.Evaluate("z = a_raiz * 2", NumberBase.Decimal);
+
+        Assert.Equal(new BigInteger(20), Valor(s, "z"));
+        s.RemoveLast();
+
+        Assert.False(s.Variables.IsDefined("z"));
+        Assert.Equal(new BigInteger(10), Valor(s, "a_raiz"));
+        Assert.Equal(new BigInteger(97), Valor(s, "a_exc"));
+    }
+
+    [Fact]
+    public void Variaveis_e_sufixo_sobrevivem_a_gravar_e_carregar()
+    {
+        var store = new SessionStore(_dir);
+        var original = SessionWith1234();
+        original.AddRootResult("a", 3);
+        original.AddRootResult("a", 2);
+        var path = store.NewSessionPath();
+        store.Save(original, path);
+
+        Assert.Contains("\"suffix\": 2", File.ReadAllText(path));
+
+        var loaded = new CalculationSession();
+        store.LoadInto(loaded, path);
+
+        Assert.Equal(2, loaded.Entries[2].RootSuffix);
+        Assert.Equal(new BigInteger(10), Valor(loaded, "a_raiz"));
+        Assert.Equal(new BigInteger(35), Valor(loaded, "a_raiz2"));
+        Assert.Equal(new BigInteger(62), Valor(loaded, "a_exc2"));
+    }
+
+    [Fact]
+    public void Nomes_das_variaveis_criadas_aparecem_no_texto_de_cada_painel()
+    {
+        var s = SessionWith1234();
+        var entry = s.AddRootResult("a", 3);
+
+        var text = Formatting.RootFormatter.Format("a", entry.Root!, NumberBase.Hexadecimal, entry.RootAssignments);
+
+        Assert.Equal("variáveis criadas: a_raiz, a_pot, a_dif, a_prox, a_proxpot, a_exc", text.Variables);
+    }
+
+    private static BigInteger Valor(CalculationSession s, string name)
+    {
+        Assert.True(s.Variables.TryGet(name, out var value), $"variável '{name}' não existe");
+        return value;
     }
 }

@@ -230,7 +230,9 @@ public sealed partial class MainViewModel : ObservableObject
         Session.RemoveLast();
         StatusMessage = last.IsSeparator
             ? "Linha separadora apagada."
-            : $"Linha apagada: {last.RawText}";
+            : last.IsRootResult
+                ? $"Raiz de {last.RawText} apagada, com as {last.RootAssignments.Count} variáveis que criou."
+                : $"Linha apagada: {last.RawText}";
     }
 
     /// <summary>Insere uma linha tracejada separadora no fim do histórico.</summary>
@@ -292,9 +294,11 @@ public sealed partial class MainViewModel : ObservableObject
         {
             var entry = Session.AddRootResult(request.VariableName, request.Exponent);
             var result = entry.Root!;
-            StatusMessage = result.IsExact
+            var created = entry.RootAssignments.Count;
+            StatusMessage = (result.IsExact
                 ? $"Raiz {result.N} de {request.VariableName}: exata, x = {NumberFormatter.Format(result.Root, NumberBase.Decimal)}."
-                : $"Raiz {result.N} de {request.VariableName}: x = {NumberFormatter.Format(result.Root, NumberBase.Decimal)}, diferença {NumberFormatter.Format(result.Difference, NumberBase.Decimal)}.";
+                : $"Raiz {result.N} de {request.VariableName}: x = {NumberFormatter.Format(result.Root, NumberBase.Decimal)}, diferença {NumberFormatter.Format(result.Difference, NumberBase.Decimal)}.")
+                + $" {created} variáveis criadas.";
         }
         catch (CalculationException ex)
         {
@@ -348,9 +352,16 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
-        VariablesSummary = string.Join("    ", vars
+        // Funções como a raiz inteira criam várias variáveis de uma vez: a barra mostra as primeiras e conta o resto.
+        const int MaxShown = 5;
+        var shown = string.Join("    ", vars
             .OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
+            .Take(MaxShown)
             .Select(kv => $"{kv.Key} = {NumberFormatter.Format(kv.Value, NumberBase.Hexadecimal)}h ({NumberFormatter.Format(kv.Value, NumberBase.Decimal)})"));
+
+        VariablesSummary = vars.Count > MaxShown
+            ? $"{shown}    … e mais {vars.Count - MaxShown} (Ctrl+Shift+V lista todas)"
+            : shown;
     }
 
     private static string EnsureDirectory(string directory)

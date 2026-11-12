@@ -15,7 +15,8 @@ public sealed record DisplayLine(
     bool IsRootResult = false,
     string Title = "",
     string Detail = "",
-    string Note = "")
+    string Note = "",
+    string Variables = "")
 {
     public string Expression => string.Concat(Segments.Select(s => s.Text));
 
@@ -23,6 +24,8 @@ public sealed record DisplayLine(
     public bool IsCalculation => !IsSeparator && !IsComment && !IsRootResult;
 
     public bool HasNote => Note.Length > 0;
+
+    public bool HasVariables => Variables.Length > 0;
 
     /// <summary>Texto literal de um comentário (o '#' inicial é mantido).</summary>
     public string CommentText => IsComment ? Result : string.Empty;
@@ -40,9 +43,10 @@ public sealed record DisplayLine(
 
         if (entry.IsRootResult && entry.Root is { } root)
         {
-            var text = RootFormatter.Format(entry.RawText, root, paneBase);
+            var text = RootFormatter.Format(entry.RawText, root, paneBase, entry.RootAssignments);
             return new DisplayLine(entry.Id, Array.Empty<TextSegment>(), string.Empty, IsError: false,
-                IsRootResult: true, Title: text.Title, Detail: text.Detail, Note: text.Note ?? string.Empty);
+                IsRootResult: true, Title: text.Title, Detail: text.Detail, Note: text.Note ?? string.Empty,
+                Variables: text.Variables ?? string.Empty);
         }
 
         if (entry.IsVariablePrint && entry.Value is { } printed)
