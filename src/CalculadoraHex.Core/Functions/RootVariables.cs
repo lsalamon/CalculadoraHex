@@ -3,7 +3,8 @@ using System.Numerics;
 
 namespace CalculadoraHex.Core.Functions;
 
-public sealed record RootVariable(string Name, BigInteger Value);
+/// <param name="Explanation">O que o valor é, em uma frase; vai num comentário antes da atribuição.</param>
+public sealed record RootVariable(string Name, BigInteger Value, string Explanation);
 
 /// <summary>
 /// Variáveis novas criadas por um resultado de raiz inteira, com nomes derivados da variável de origem:
@@ -20,19 +21,27 @@ public static class RootVariables
         ArgumentNullException.ThrowIfNull(result);
 
         var tail = suffix <= 1 ? string.Empty : suffix.ToString(CultureInfo.InvariantCulture);
+        var n = result.N;
+        var factors = n == 1 ? "1 fator" : $"{n} fatores";
 
         var list = new List<RootVariable>
         {
-            new($"{source}_raiz{tail}", result.Root),
-            new($"{source}_pot{tail}", result.Power),
-            new($"{source}_dif{tail}", result.Difference),
+            new($"{source}_raiz{tail}", result.Root,
+                $"x, o inteiro cuja potência de {factors} chega mais perto de {source} sem passar"),
+            new($"{source}_pot{tail}", result.Power,
+                $"x^{n}, o produto de {factors} iguais a x"),
+            new($"{source}_dif{tail}", result.Difference,
+                $"{source} - x^{n}, o que sobra de {source} depois de tirar x^{n} (zero se a conta é exata)"),
         };
 
         if (!result.IsExact)
         {
-            list.Add(new($"{source}_prox{tail}", result.NextRoot));
-            list.Add(new($"{source}_proxpot{tail}", result.NextPower));
-            list.Add(new($"{source}_exc{tail}", result.NextExcess));
+            list.Add(new($"{source}_prox{tail}", result.NextRoot,
+                $"x + 1, o primeiro inteiro cuja potência passa de {source}"));
+            list.Add(new($"{source}_proxpot{tail}", result.NextPower,
+                $"(x + 1)^{n}, a potência do inteiro seguinte"));
+            list.Add(new($"{source}_exc{tail}", result.NextExcess,
+                $"(x + 1)^{n} - {source}, quanto a potência do seguinte passa de {source}"));
         }
 
         return list;

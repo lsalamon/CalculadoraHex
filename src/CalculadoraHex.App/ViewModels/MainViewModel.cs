@@ -284,6 +284,10 @@ public sealed partial class MainViewModel : ObservableObject
     private const int BeforeEnterMs = 140;
     private const int AfterResultMs = 220;
 
+    // Comentários são longos e não têm resultado a esperar: saem em blocos de caracteres e com pausas curtas.
+    private const int CommentChunk = 4;
+    private const int CommentPauseMs = 80;
+
     /// <summary>
     /// Especiais > Raiz inteira: menor inteiro que, multiplicado por si próprio n vezes, não passa do valor
     /// de uma variável; informa a diferença quando a conta não fecha. Sem variável definida, pede que uma seja atribuída.
@@ -360,19 +364,22 @@ public sealed partial class MainViewModel : ObservableObject
         {
             foreach (var line in lines)
             {
+                var isComment = line.StartsWith('#');
+                var chunk = isComment ? CommentChunk : 1;
+
                 pane.InputText = string.Empty;
-                foreach (var ch in line)
+                for (var i = 0; i < line.Length; i += chunk)
                 {
-                    pane.InputText += ch;
+                    pane.InputText += line.Substring(i, Math.Min(chunk, line.Length - i));
                     await Task.Delay(CharDelayMs, cts.Token);
                 }
 
-                await Task.Delay(BeforeEnterMs, cts.Token);
+                await Task.Delay(isComment ? CommentPauseMs : BeforeEnterMs, cts.Token);
                 cts.Token.ThrowIfCancellationRequested(); // a sessão pode ter sido zerada durante a espera
                 Session.Evaluate(line, pane.Base);
                 pane.InputText = string.Empty;
 
-                await Task.Delay(AfterResultMs, cts.Token);
+                await Task.Delay(isComment ? CommentPauseMs : AfterResultMs, cts.Token);
             }
 
             return true;

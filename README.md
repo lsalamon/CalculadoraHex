@@ -20,15 +20,21 @@ Digite uma expressão na linha `>` de qualquer painel e pressione Enter. Os díg
 - Ctrl+1 e Ctrl+2 ocultam ou exibem cada painel; ao voltar, o histórico completo está lá.
 - Comentários: uma linha que começa por `#` não é calculada. O texto entra literalmente, com o `#`, nos dois painéis (ex.: `#soma de valores`). É gravado na sessão, exportado e pode ser apagado como qualquer linha.
 - Menu **Editar**: Ctrl+D apaga a última linha do histórico e recalcula as variáveis; Ctrl+T insere uma linha tracejada separadora nos dois painéis (também gravada e exportada).
-- Menu **Especiais > Raiz inteira de uma variável** (Ctrl+R): acha o menor inteiro `x` que, multiplicado por si próprio `n` vezes, não passa do valor de uma variável escolhida. `n` é a quantidade de fatores, sempre em decimal (`n = 3` é `x·x·x`). Sem variável definida, pede que uma seja atribuída. Resolvida a conta, os valores são **digitados sozinhos na linha de entrada do painel ativo, um por vez**, como se você fizesse a entrada dos dados, e cada um mostra o seu resultado antes do próximo. São um comentário com a variável e o `n` e atribuições a **variáveis novas** derivadas do nome escolhido: `a_raiz`, `a_pot` e `a_dif` (x, x^n e a diferença) e, se a conta não fecha, `a_prox`, `a_proxpot` e `a_exc` (o inteiro seguinte, sua potência e quanto ela passa). Se algum nome já existir, o conjunto inteiro ganha um número no fim (`a_raiz2`...) e nada é sobrescrito. Cada linha é uma entrada comum do histórico, apagável com Ctrl+D uma por vez. Para `a = 1234` e `n = 3`:
+- Menu **Especiais > Raiz inteira de uma variável** (Ctrl+R): acha o menor inteiro `x` que, multiplicado por si próprio `n` vezes, não passa do valor de uma variável escolhida. `n` é a quantidade de fatores, sempre em decimal (`n = 3` é `x·x·x`). Sem variável definida, pede que uma seja atribuída. Resolvida a conta, os valores são **digitados sozinhos na linha de entrada do painel ativo, um por vez**, como se você fizesse a entrada dos dados, e cada um mostra o seu resultado antes do próximo. São um comentário com a variável e o `n` e, para cada valor, um comentário que o explica seguido da atribuição a uma **variável nova** derivada do nome escolhido: `a_raiz`, `a_pot` e `a_dif` (x, x^n e a diferença) e, se a conta não fecha, `a_prox`, `a_proxpot` e `a_exc` (o inteiro seguinte, sua potência e quanto ela passa). Se algum nome já existir, o conjunto inteiro ganha um número no fim (`a_raiz2`...) e nada é sobrescrito. Cada linha é uma entrada comum do histórico, apagável com Ctrl+D uma por vez. Para `a = 1234` e `n = 3`:
 
   ```text
   #raiz 3 de a
+  #a_raiz: x, o inteiro cuja potência de 3 fatores chega mais perto de a sem passar
   a_raiz = 10
+  #a_pot: x^3, o produto de 3 fatores iguais a x
   a_pot = 1000
+  #a_dif: a - x^3, o que sobra de a depois de tirar x^3 (zero se a conta é exata)
   a_dif = 234
+  #a_prox: x + 1, o primeiro inteiro cuja potência passa de a
   a_prox = 11
+  #a_proxpot: (x + 1)^3, a potência do inteiro seguinte
   a_proxpot = 1331
+  #a_exc: (x + 1)^3 - a, quanto a potência do seguinte passa de a
   a_exc = 97
   ```
 - Menu **Variáveis**: Ctrl+P imprime todas as variáveis no display, uma por linha e em ordem alfabética, entre linhas separadoras (sem repetir a anterior se já houver uma). Essas linhas guardam o valor daquele momento e são gravadas na sessão.

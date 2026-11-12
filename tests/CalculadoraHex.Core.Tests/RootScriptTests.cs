@@ -16,8 +16,11 @@ public sealed class RootScriptTests : IDisposable
         if (Directory.Exists(_dir)) Directory.Delete(_dir, recursive: true);
     }
 
+    private static List<string> Assignments(IEnumerable<string> lines) =>
+        lines.Where(l => !l.StartsWith('#')).ToList();
+
     [Fact]
-    public void Linhas_em_decimal_seguem_o_exemplo_da_especificacao()
+    public void Linhas_em_decimal_seguem_o_exemplo_da_especificacao_com_um_comentario_antes_de_cada_valor()
     {
         var lines = RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Decimal);
 
@@ -25,43 +28,77 @@ public sealed class RootScriptTests : IDisposable
             new[]
             {
                 "#raiz 3 de a",
-                "a_raiz = 10", "a_pot = 1000", "a_dif = 234",
-                "a_prox = 11", "a_proxpot = 1331", "a_exc = 97",
+                "#a_raiz: x, o inteiro cuja potência de 3 fatores chega mais perto de a sem passar",
+                "a_raiz = 10",
+                "#a_pot: x^3, o produto de 3 fatores iguais a x",
+                "a_pot = 1000",
+                "#a_dif: a - x^3, o que sobra de a depois de tirar x^3 (zero se a conta é exata)",
+                "a_dif = 234",
+                "#a_prox: x + 1, o primeiro inteiro cuja potência passa de a",
+                "a_prox = 11",
+                "#a_proxpot: (x + 1)^3, a potência do inteiro seguinte",
+                "a_proxpot = 1331",
+                "#a_exc: (x + 1)^3 - a, quanto a potência do seguinte passa de a",
+                "a_exc = 97",
             },
             lines);
     }
 
     [Fact]
-    public void Em_hexa_numero_que_comeca_por_letra_leva_0x()
+    public void Todo_valor_vem_logo_depois_do_comentario_que_o_explica()
     {
-        var lines = RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Hexadecimal);
+        var lines = RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Decimal);
+
+        for (var i = 1; i < lines.Count; i += 2)
+        {
+            Assert.StartsWith("#", lines[i]);
+            Assert.False(lines[i + 1].StartsWith('#'));
+            var name = lines[i + 1].Split(' ')[0];
+            Assert.StartsWith($"#{name}:", lines[i]);
+        }
+    }
+
+    [Fact]
+    public void Em_hexa_numero_que_comeca_por_letra_leva_0x_e_os_comentarios_nao_mudam()
+    {
+        var dec = RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Decimal);
+        var hex = RootScript.Build("a", IntegerRoot.Compute(1234, 3), 1, NumberBase.Hexadecimal);
 
         // 10 = A, 1000 = 3E8, 234 = EA, 11 = B, 1331 = 533, 97 = 61
         Assert.Equal(
-            new[]
-            {
-                "#raiz 3 de a",
-                "a_raiz = 0xA", "a_pot = 3E8", "a_dif = 0xEA",
-                "a_prox = 0xB", "a_proxpot = 533", "a_exc = 61",
-            },
-            lines);
+            new[] { "a_raiz = 0xA", "a_pot = 3E8", "a_dif = 0xEA", "a_prox = 0xB", "a_proxpot = 533", "a_exc = 61" },
+            Assignments(hex));
+        Assert.Equal(
+            dec.Where(l => l.StartsWith('#')),
+            hex.Where(l => l.StartsWith('#')));
     }
 
     [Fact]
-    public void Conta_exata_tem_comentario_e_tres_atribuicoes()
+    public void Conta_exata_tem_cabecalho_e_tres_valores_comentados()
     {
         var lines = RootScript.Build("b", IntegerRoot.Compute(1000, 3), 1, NumberBase.Decimal);
 
-        Assert.Equal(new[] { "#raiz 3 de b", "b_raiz = 10", "b_pot = 1000", "b_dif = 0" }, lines);
+        Assert.Equal(1 + 3 * 2, lines.Count);
+        Assert.Equal(new[] { "b_raiz = 10", "b_pot = 1000", "b_dif = 0" }, Assignments(lines));
     }
 
     [Fact]
-    public void Sufixo_aparece_nos_nomes_das_linhas()
+    public void Sufixo_aparece_nos_nomes_dos_valores_e_dos_comentarios()
     {
         var lines = RootScript.Build("a", IntegerRoot.Compute(1234, 2), 2, NumberBase.Decimal);
 
-        Assert.Equal("a_raiz2 = 35", lines[1]);
-        Assert.Equal("a_exc2 = 62", lines[6]);
+        Assert.Equal("a_raiz2 = 35", Assignments(lines)[0]);
+        Assert.Equal("a_exc2 = 62", Assignments(lines)[5]);
+        Assert.StartsWith("#a_raiz2:", lines[1]);
+    }
+
+    [Fact]
+    public void Com_um_so_fator_o_texto_fica_no_singular()
+    {
+        var lines = RootScript.Build("v", IntegerRoot.Compute(7, 1), 1, NumberBase.Decimal);
+
+        Assert.Contains("1 fator ", lines[1]);
+        Assert.DoesNotContain("1 fatores", string.Join('\n', lines));
     }
 
     [Theory]
@@ -122,25 +159,31 @@ public sealed class RootScriptTests : IDisposable
         foreach (var line in RootScript.Build("a", result, 1, NumberBase.Decimal))
             session.Evaluate(line, NumberBase.Decimal);
 
-        // 1 atribuição + comentário + 6 atribuições
-        Assert.Equal(8, session.Entries.Count);
+        // 1 atribuição + cabeçalho + 6 comentários + 6 atribuições
+        Assert.Equal(14, session.Entries.Count);
         Assert.True(session.Entries[1].IsComment);
         Assert.Equal("#raiz 3 de a", session.Entries[1].RawText);
+        Assert.True(session.Entries[2].IsComment);
+        Assert.StartsWith("#a_raiz:", session.Entries[2].RawText);
 
         var store = new SessionStore(_dir);
         var path = store.NewSessionPath();
         store.Save(session, path);
         var loaded = new CalculationSession();
         store.LoadInto(loaded, path);
-        Assert.Equal(8, loaded.Entries.Count);
+        Assert.Equal(14, loaded.Entries.Count);
         Assert.True(loaded.Variables.TryGet("a_exc", out var exc));
         Assert.Equal(new BigInteger(97), exc);
 
+        var text = SessionStore.ExportText(session);
+        Assert.Contains("#a_pot: x^3, o produto de 3 fatores iguais a x", text);
+
         var imported = new CalculationSession();
-        var import = HistoryImporter.ImportInto(imported, HistoryImporter.ParseScript(SessionStore.ExportText(session), NumberBase.Decimal));
+        var import = HistoryImporter.ImportInto(imported, HistoryImporter.ParseScript(text, NumberBase.Decimal));
         Assert.Equal(0, import.Failed);
         Assert.True(imported.Variables.TryGet("a_proxpot", out var proxpot));
         Assert.Equal(new BigInteger(1331), proxpot);
+        Assert.Equal(14, imported.Entries.Count);
 
         // Ctrl+D apaga uma linha por vez, e a variável some com a sua linha
         session.RemoveLast();
