@@ -65,6 +65,26 @@ public sealed class EditTests : IDisposable
     }
 
     [Fact]
+    public void Separador_sem_repeticao_so_insere_se_a_ultima_linha_nao_for_um()
+    {
+        var s = new CalculationSession();
+
+        Assert.True(s.AddSeparatorUnlessLast());   // histórico vazio
+        Assert.False(s.AddSeparatorUnlessLast());  // já é a última
+        Assert.Single(s.Entries);
+
+        s.Evaluate("1+1", NumberBase.Decimal);
+        Assert.True(s.AddSeparatorUnlessLast());   // última é um cálculo
+        Assert.False(s.AddSeparatorUnlessLast());
+        Assert.Equal(3, s.Entries.Count);
+        Assert.True(s.Entries[2].IsSeparator);
+
+        s.AddComment("#nota");
+        Assert.True(s.AddSeparatorUnlessLast());   // última é um comentário
+        Assert.Equal(5, s.Entries.Count);
+    }
+
+    [Fact]
     public void Separador_sobrevive_a_gravar_carregar_e_exportar()
     {
         var store = new SessionStore(_dir);

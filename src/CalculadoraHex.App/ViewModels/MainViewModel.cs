@@ -362,6 +362,10 @@ public sealed partial class MainViewModel : ObservableObject
 
         try
         {
+            // O bloco abre com uma linha tracejada, para ficar destacado; não repete uma que já esteja por último.
+            if (Session.AddSeparatorUnlessLast())
+                await Task.Delay(AfterResultMs, cts.Token);
+
             foreach (var line in lines)
             {
                 var isComment = line.StartsWith('#');

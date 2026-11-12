@@ -70,6 +70,18 @@ public sealed class CalculationSession
         return entry;
     }
 
+    /// <summary>
+    /// Insere uma linha separadora, a menos que a última linha do histórico já seja uma.
+    /// Retorna verdadeiro se inseriu.
+    /// </summary>
+    public bool AddSeparatorUnlessLast()
+    {
+        if (_entries.Count > 0 && _entries[^1].IsSeparator) return false;
+
+        AddSeparator();
+        return true;
+    }
+
     public CalculationEntry AddVariablePrint(string name, System.Numerics.BigInteger value) =>
         AddVariablePrint(name, value, DateTimeOffset.Now);
 
@@ -90,8 +102,7 @@ public sealed class CalculationSession
         var snapshot = Variables.Snapshot();
         if (snapshot.Count == 0) return 0;
 
-        if (_entries.Count == 0 || !_entries[^1].IsSeparator)
-            AddSeparator();
+        AddSeparatorUnlessLast();
 
         var now = DateTimeOffset.Now;
         foreach (var kv in snapshot.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
