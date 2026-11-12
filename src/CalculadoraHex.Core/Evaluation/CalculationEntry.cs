@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Text.Json.Serialization;
+using CalculadoraHex.Core.Functions;
 using CalculadoraHex.Core.Parsing;
 
 namespace CalculadoraHex.Core.Evaluation;
@@ -17,6 +18,9 @@ public enum EntryKind
 
     /// <summary>Texto livre que começa por '#': inserido literalmente, sem avaliação.</summary>
     Comment,
+
+    /// <summary>Resultado de Especiais > Raiz inteira: guarda variável, valor e n; o resto é recalculado.</summary>
+    RootResult,
 }
 
 /// <summary>
@@ -55,6 +59,15 @@ public sealed class CalculationEntry
     [JsonIgnore]
     public bool IsComment => Kind == EntryKind.Comment;
 
+    [JsonIgnore]
+    public bool IsRootResult => Kind == EntryKind.RootResult;
+
+    /// <summary>Quantidade de fatores n de uma raiz inteira (só em <see cref="EntryKind.RootResult"/>).</summary>
+    public int? RootExponent { get; init; }
+
+    [JsonIgnore]
+    public IntegerRootResult? Root { get; init; }
+
     /// <summary>Linhas que não são reavaliadas ao reconstruir o histórico (separadores, impressões e comentários).</summary>
     [JsonIgnore]
     public bool IsStatic => Kind != EntryKind.Calculation;
@@ -75,6 +88,17 @@ public sealed class CalculationEntry
         Timestamp = timestamp,
         InputBase = inputBase,
         RawText = text,
+    };
+
+    public static CalculationEntry CreateRootResult(string variableName, IntegerRootResult result, DateTimeOffset timestamp) => new()
+    {
+        Kind = EntryKind.RootResult,
+        Timestamp = timestamp,
+        RawText = variableName,
+        AssignedVariable = variableName,
+        Value = result.Value,
+        RootExponent = result.N,
+        Root = result,
     };
 
     public static CalculationEntry CreateVariablePrint(string name, BigInteger value, DateTimeOffset timestamp) => new()

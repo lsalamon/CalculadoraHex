@@ -17,11 +17,22 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         DataContext = _viewModel;
+        _activePane = HexPaneView;
 
         _viewModel.ShowVariablesRequested += (_, _) => ShowVariablesWindow();
         _viewModel.ShowHelpRequested += (_, _) => ShowHelpWindow();
 
-        _activePane = HexPaneView;
+        _viewModel.AskRootRequest = variables =>
+        {
+            var dialog = new RootWindow(variables) { Owner = this };
+            return dialog.ShowDialog() == true ? dialog.Request : null;
+        };
+        _viewModel.FocusInputRequested += (_, _) =>
+        {
+            if (_activePane.Visibility == Visibility.Visible) _activePane.FocusInput();
+            else FocusFirstVisiblePane();
+        };
+
         HexPaneView.InputFocused += (_, _) => { _activePane = HexPaneView; _viewModel.ActiveBase = Core.NumberBase.Hexadecimal; };
         DecimalPaneView.InputFocused += (_, _) => { _activePane = DecimalPaneView; _viewModel.ActiveBase = Core.NumberBase.Decimal; };
 

@@ -6,8 +6,7 @@ namespace CalculadoraHex.App.Services;
 /// <summary>Preferências do usuário (não confundir com a sessão de cálculo), gravadas em %LOCALAPPDATA%\CalculadoraHex.</summary>
 public sealed class UserPreferences
 {
-    public static readonly string Directory =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CalculadoraHex");
+    public static readonly string Directory = CalculadoraHex.Core.AppPaths.DataDirectory;
 
     private static readonly string FilePath = Path.Combine(Directory, "preferencias.json");
 

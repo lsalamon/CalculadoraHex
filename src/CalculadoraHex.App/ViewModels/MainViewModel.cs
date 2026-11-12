@@ -263,6 +263,45 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ShowHelp() => ShowHelpRequested?.Invoke(this, EventArgs.Empty);
 
+    /// <summary>A janela decide variável e n (abre o diálogo); retorna nulo se cancelado.</summary>
+    public Func<IReadOnlyDictionary<string, System.Numerics.BigInteger>, RootRequest?>? AskRootRequest { get; set; }
+
+    /// <summary>Pede à janela que devolva o foco à linha de entrada (depois do aviso de falta de variável).</summary>
+    public event EventHandler? FocusInputRequested;
+
+    /// <summary>
+    /// Especiais > Raiz inteira: menor inteiro que, multiplicado por si próprio n vezes, não passa do valor
+    /// de uma variável; informa a diferença quando a conta não fecha. Sem variável definida, pede que uma seja atribuída.
+    /// </summary>
+    [RelayCommand]
+    private void RootOfVariable()
+    {
+        if (Session.Variables.Count == 0)
+        {
+            MessageBox.Show(
+                "Não há nenhuma variável definida.\n\nAtribua um valor a uma variável antes, por exemplo a=1000, e execute esta função de novo.",
+                "Raiz inteira", MessageBoxButton.OK, MessageBoxImage.Information);
+            FocusInputRequested?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        var request = AskRootRequest?.Invoke(Session.Variables.Snapshot());
+        if (request is null) return;
+
+        try
+        {
+            var entry = Session.AddRootResult(request.VariableName, request.Exponent);
+            var result = entry.Root!;
+            StatusMessage = result.IsExact
+                ? $"Raiz {result.N} de {request.VariableName}: exata, x = {NumberFormatter.Format(result.Root, NumberBase.Decimal)}."
+                : $"Raiz {result.N} de {request.VariableName}: x = {NumberFormatter.Format(result.Root, NumberBase.Decimal)}, diferença {NumberFormatter.Format(result.Difference, NumberBase.Decimal)}.";
+        }
+        catch (CalculationException ex)
+        {
+            MessageBox.Show(ex.Message, "Raiz inteira", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     /// <summary>Imprime todas as variáveis no display, entre separadores (sem repetir o anterior se já houver um).</summary>
     [RelayCommand]
     private void PrintVariables()

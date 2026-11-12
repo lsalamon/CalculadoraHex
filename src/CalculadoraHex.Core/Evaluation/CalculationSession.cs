@@ -1,3 +1,6 @@
+using System.Numerics;
+using CalculadoraHex.Core.Functions;
+
 namespace CalculadoraHex.Core.Evaluation;
 
 /// <summary>
@@ -57,6 +60,27 @@ public sealed class CalculationSession
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(text);
         var entry = CalculationEntry.CreateComment(text.Trim(), inputBase, timestamp ?? DateTimeOffset.Now);
+        Add(entry);
+        return entry;
+    }
+
+    /// <summary>
+    /// Calcula a raiz inteira de n fatores do valor que a variável guarda agora e acrescenta o resultado ao histórico.
+    /// Lança <see cref="CalculationException"/> se a variável não existe ou se o valor ou n são inválidos.
+    /// </summary>
+    public CalculationEntry AddRootResult(string variableName, int n)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(variableName);
+        if (!Variables.TryGet(variableName, out var value))
+            throw new CalculationException($"Variável '{variableName}' não definida.");
+
+        return AddRootResult(variableName, value, n, DateTimeOffset.Now);
+    }
+
+    public CalculationEntry AddRootResult(string variableName, BigInteger value, int n, DateTimeOffset timestamp)
+    {
+        var result = IntegerRoot.Compute(value, n);
+        var entry = CalculationEntry.CreateRootResult(variableName, result, timestamp);
         Add(entry);
         return entry;
     }

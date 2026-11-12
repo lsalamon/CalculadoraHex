@@ -93,6 +93,34 @@
                                         </TextBlock>
                                     </StackPanel>
 
+                                    <!-- Resultado de Especiais > Raiz inteira: título, resultado e, se inexato, o inteiro seguinte -->
+                                    <StackPanel Margin="0,2,0,12">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsRootResult}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <TextBlock Text="{Binding Title}" Style="{StaticResource DisplayExpressionStyle}" />
+                                        <TextBlock Text="{Binding Detail}" Style="{StaticResource DisplayTextStyle}"
+                                                   FontSize="20" Margin="0,4,0,0" HorizontalAlignment="Left" />
+                                        <TextBlock Text="{Binding Note}" Margin="0,4,0,0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource DisplayExpressionStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasNote}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+
                                     <!-- Linha separadora tracejada -->
                                     <!-- Line (um único traço) em vez de Rectangle: as bordas de um retângulo fino sobrepõem os vãos. -->
                                     <Line X1="0" Y1="0" X2="1" Y2="0" Stretch="Fill" Height="2" Margin="0,8,0,14"

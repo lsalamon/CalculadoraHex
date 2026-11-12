@@ -108,6 +108,10 @@ public static class HistoryImporter
             {
                 items.Add(ImportItem.Separator(at));
             }
+            else if (e.IsRoot)
+            {
+                // Resultado derivado de uma variável: não é recriado na importação.
+            }
             else if (e.IsVariablePrint)
             {
                 if (SessionStore.TryParseValue(e.Value, out var printed) && !string.IsNullOrWhiteSpace(e.Text))

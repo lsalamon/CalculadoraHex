@@ -7,7 +7,11 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace CalculadoraHex.App.ViewModels;
 
-public sealed record VariableRow(string Name, string Hex, string Decimal);
+public sealed record VariableRow(string Name, string Hex, string Decimal)
+{
+    /// <summary>Linha de lista: "a = 1234  (4D2h)".</summary>
+    public string Display => $"{Name} = {Decimal}  ({Hex}h)";
+}
 
 /// <summary>Lista as variáveis nas duas bases e permite remover uma ou todas.</summary>
 public sealed partial class VariablesViewModel : ObservableObject

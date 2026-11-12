@@ -1,0 +1,64 @@
+<Window x:Class="CalculadoraHex.App.Views.RootWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Raiz inteira de uma variável"
+        Width="500" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        Background="{StaticResource BezelBrush}">
+
+    <Window.Resources>
+        <Style x:Key="VariableItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="6,3" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource DisplayDimBrush}" />
+                                <Setter Property="Foreground" Value="{StaticResource DisplayBackgroundBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Margin="14">
+        <TextBlock Style="{StaticResource StatusTextStyle}" FontSize="13" TextWrapping="Wrap"
+                   Text="Encontra o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor da variável. Se a conta não fechar, informa a diferença." />
+
+        <TextBlock Style="{StaticResource StatusTextStyle}" FontSize="13" FontWeight="SemiBold" Margin="0,14,0,6"
+                   Text="Variável cujo valor será perseguido" />
+        <Border Style="{StaticResource DisplayBorderStyle}" Padding="4">
+            <ListBox x:Name="VariableList" Height="150" Background="Transparent" BorderThickness="0"
+                     Foreground="{StaticResource DisplayForegroundBrush}"
+                     ItemContainerStyle="{StaticResource VariableItemStyle}"
+                     MouseDoubleClick="OnListDoubleClick">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Display}" FontFamily="{StaticResource DisplayFont}" FontSize="16" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+            <TextBlock Style="{StaticResource StatusTextStyle}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Text="n = " />
+            <TextBox x:Name="ExponentBox" Text="2" Width="90" Padding="4,3" FontSize="14" VerticalContentAlignment="Center" />
+        </StackPanel>
+        <TextBlock Style="{StaticResource StatusTextStyle}" Opacity="0.8" TextWrapping="Wrap" Margin="0,6,0,0"
+                   Text="n é a quantidade de fatores, sempre em decimal, de 1 a 10000. Com n = 3 o cálculo é x · x · x." />
+
+        <TextBlock x:Name="ErrorText" Foreground="{StaticResource DisplayErrorBrush}" FontFamily="{StaticResource LabelFont}"
+                   FontSize="12" TextWrapping="Wrap" Margin="0,10,0,0" Visibility="Collapsed" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="_Calcular" IsDefault="True" Click="OnCalculateClick" MinWidth="90" Padding="8,4" Margin="0,0,8,0" />
+            <Button Content="Ca_ncelar" IsCancel="True" MinWidth="90" Padding="8,4" />
+        </StackPanel>
+    </StackPanel>
+</Window>

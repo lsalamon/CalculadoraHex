@@ -20,12 +20,21 @@ Digite uma expressão na linha `>` de qualquer painel e pressione Enter. Os díg
 - Ctrl+1 e Ctrl+2 ocultam ou exibem cada painel; ao voltar, o histórico completo está lá.
 - Comentários: uma linha que começa por `#` não é calculada. O texto entra literalmente, com o `#`, nos dois painéis (ex.: `#soma de valores`). É gravado na sessão, exportado e pode ser apagado como qualquer linha.
 - Menu **Editar**: Ctrl+D apaga a última linha do histórico e recalcula as variáveis; Ctrl+T insere uma linha tracejada separadora nos dois painéis (também gravada e exportada).
+- Menu **Especiais > Raiz inteira de uma variável** (Ctrl+R): acha o menor inteiro `x` que, multiplicado por si próprio `n` vezes, não passa do valor de uma variável escolhida. `n` é a quantidade de fatores, sempre em decimal (`n = 3` é `x·x·x`). Se a conta não fecha, informa a diferença e o inteiro seguinte. Sem variável definida, pede que uma seja atribuída. O resultado entra no histórico, em cada painel na sua base:
+
+  ```text
+  raiz 3 de a = 1234
+  x = 10    x^3 = 1000    diferença 234
+  x = 11 daria 1331, que passa 97
+  ```
 - Menu **Variáveis**: Ctrl+P imprime todas as variáveis no display, uma por linha e em ordem alfabética, entre linhas separadoras (sem repetir a anterior se já houver uma). Essas linhas guardam o valor daquele momento e são gravadas na sessão.
 - F1 abre a referência de sintaxe e atalhos.
 
 ## Sessões
 
 Cada operação é gravada em `%LOCALAPPDATA%\CalculadoraHex\sessoes\<data_hora>.json`. Ao abrir a app, a última sessão volta com histórico e variáveis. O menu **Arquivo** permite iniciar outra sessão, abrir uma antiga, salvar com outro nome e exportar o histórico em texto com as duas bases lado a lado.
+
+Para rodar sem tocar nas sessões e preferências do uso normal, defina a variável de ambiente `CALCULADORAHEX_DATA` com o caminho de uma pasta; a app passa a gravar ali.
 
 ### Importar histórico
 

@@ -21,6 +21,7 @@
         <KeyBinding Modifiers="Ctrl" Key="D" Command="{Binding DeleteLastLineCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="T" Command="{Binding InsertSeparatorCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="P" Command="{Binding PrintVariablesCommand}" />
+        <KeyBinding Modifiers="Ctrl" Key="R" Command="{Binding RootOfVariableCommand}" />
         <KeyBinding Key="F1" Command="{Binding ShowHelpCommand}" />
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{Binding ClearDisplayCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift" Key="V" Command="{Binding ShowVariablesCommand}" />
@@ -58,6 +59,10 @@
                           ToolTip="Acrescenta ao histórico uma linha por variável, entre linhas separadoras" />
                 <Separator />
                 <MenuItem Header="Limpar _todas" Command="{Binding ClearVariablesCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Especiais">
+                <MenuItem Header="_Raiz inteira de uma variável..." Command="{Binding RootOfVariableCommand}" InputGestureText="Ctrl+R"
+                          ToolTip="Menor inteiro que, multiplicado por si próprio n vezes, não passa do valor de uma variável; informa a diferença" />
             </MenuItem>
             <!-- Cada item insere o símbolo na linha de entrada que estava com o foco -->
             <MenuItem Header="_Operações">

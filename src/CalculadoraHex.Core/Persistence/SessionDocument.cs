@@ -27,6 +27,8 @@ public sealed class EntryDocument
 
     public const string CommentKind = "cmt";
 
+    public const string RootKind = "root";
+
     public DateTimeOffset Timestamp { get; set; }
 
     /// <summary>"sep" separador, "var" impressão de variável, "cmt" comentário; ausente ou nulo para cálculo.</summary>
@@ -43,6 +45,10 @@ public sealed class EntryDocument
 
     public string? Error { get; set; }
 
+    /// <summary>Quantidade de fatores n, só em linhas "root"; nelas Text é a variável e Value o valor perseguido.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Exponent { get; set; }
+
     [JsonIgnore]
     public bool IsSeparator => string.Equals(Kind, SeparatorKind, StringComparison.OrdinalIgnoreCase);
 
@@ -51,4 +57,7 @@ public sealed class EntryDocument
 
     [JsonIgnore]
     public bool IsComment => string.Equals(Kind, CommentKind, StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
+    public bool IsRoot => string.Equals(Kind, RootKind, StringComparison.OrdinalIgnoreCase);
 }

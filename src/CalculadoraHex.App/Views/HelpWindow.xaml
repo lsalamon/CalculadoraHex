@@ -65,6 +65,17 @@
                 <TextBlock Style="{StaticResource H}" Text="Sessões" />
                 <TextBlock Style="{StaticResource P}" Text="Tudo é gravado automaticamente em %LOCALAPPDATA%\CalculadoraHex\sessoes. Ao abrir, a última sessão volta com histórico e variáveis. Use Arquivo para iniciar outra, abrir uma antiga, salvar com outro nome ou exportar o histórico em texto." />
 
+                <TextBlock Style="{StaticResource H}" Text="Funções especiais" />
+                <TextBlock Style="{StaticResource P}" Text="Especiais > Raiz inteira de uma variável (Ctrl+R) acha o menor inteiro x que, multiplicado por si próprio n vezes, não passa do valor de uma variável. Escolha a variável na lista e informe n, a quantidade de fatores, sempre em decimal: n = 2 é x · x e n = 3 é x · x · x. O resultado entra no histórico, em cada painel na sua base. Se a conta não fechar, a diferença é informada, junto com o inteiro seguinte e quanto ele passa. Sem nenhuma variável definida, a função pede que você atribua uma antes. Só vale para valores maiores ou iguais a zero, e n vai de 1 a 10000." />
+                <Border Style="{StaticResource DisplayBorderStyle}" Padding="10,6">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource Code}" Text="a = 1234" />
+                        <TextBlock Style="{StaticResource Code}" Text="raiz 3 de a = 1234" />
+                        <TextBlock Style="{StaticResource Code}" Text="x = 10    x^3 = 1000    diferença 234" />
+                        <TextBlock Style="{StaticResource Code}" Text="x = 11 daria 1331, que passa 97" />
+                    </StackPanel>
+                </Border>
+
                 <TextBlock Style="{StaticResource H}" Text="Comentários" />
                 <TextBlock Style="{StaticResource P}" Text="Se a linha digitada começa por #, ela não é calculada: o texto é inserido literalmente, com o #, nos dois painéis. O comentário é gravado na sessão, sai na exportação e pode ser apagado com Ctrl+D como qualquer outra linha. Um # no meio da expressão continua sendo erro." />
                 <Border Style="{StaticResource DisplayBorderStyle}" Padding="10,6">
@@ -97,7 +108,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                         <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
-                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" Style="{StaticResource Code}" Text="Enter" /><TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource P}" Text="Avalia a linha" />
                     <TextBlock Grid.Row="1" Style="{StaticResource Code}" Text="Esc" /><TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource P}" Text="Limpa a linha de entrada" />
@@ -113,8 +124,9 @@
                     <TextBlock Grid.Row="11" Style="{StaticResource Code}" Text="Ctrl+I" /><TextBlock Grid.Row="11" Grid.Column="1" Style="{StaticResource P}" Text="Importar histórico (sessão .json ou script .txt)" />
                     <TextBlock Grid.Row="12" Style="{StaticResource Code}" Text="Ctrl+Shift+V" /><TextBlock Grid.Row="12" Grid.Column="1" Style="{StaticResource P}" Text="Janela de variáveis" />
                     <TextBlock Grid.Row="13" Style="{StaticResource Code}" Text="Ctrl+P" /><TextBlock Grid.Row="13" Grid.Column="1" Style="{StaticResource P}" Text="Imprime todas as variáveis no display" />
-                    <TextBlock Grid.Row="14" Style="{StaticResource Code}" Text="F1" /><TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource P}" Text="Esta ajuda" />
-                    <TextBlock Grid.Row="15" Style="{StaticResource Code}" Text="Alt+F4" /><TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource P}" Text="Sair (a sessão já está gravada)" />
+                    <TextBlock Grid.Row="14" Style="{StaticResource Code}" Text="Ctrl+R" /><TextBlock Grid.Row="14" Grid.Column="1" Style="{StaticResource P}" Text="Raiz inteira de uma variável (menu Especiais)" />
+                    <TextBlock Grid.Row="15" Style="{StaticResource Code}" Text="F1" /><TextBlock Grid.Row="15" Grid.Column="1" Style="{StaticResource P}" Text="Esta ajuda" />
+                    <TextBlock Grid.Row="16" Style="{StaticResource Code}" Text="Alt+F4" /><TextBlock Grid.Row="16" Grid.Column="1" Style="{StaticResource P}" Text="Sair (a sessão já está gravada)" />
                 </Grid>
             </StackPanel>
         </ScrollViewer>
